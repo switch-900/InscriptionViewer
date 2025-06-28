@@ -53,16 +53,16 @@
   "author": {
     "name": "switch-900",
     "email": "switch-900@users.noreply.github.com",
-    "url": "https://github.com/switch-900/bitcoin-inscription-viewer"
+    "url": "https://github.com/switch-900/InscriptionViewer"
   },
   "license": "MIT",
-  "homepage": "https://github.com/switch-900/bitcoin-inscription-viewer#readme",
+  "homepage": "https://github.com/switch-900/InscriptionViewer#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/switch-900/bitcoin-inscription-viewer.git"
+    "url": "git+https://github.com/switch-900/InscriptionViewer.git"
   },
   "bugs": {
-    "url": "https://github.com/switch-900/bitcoin-inscription-viewer/issues"
+    "url": "https://github.com/switch-900/InscriptionViewer/issues"
   },
   "engines": {
     "node": ">=16.0.0",
