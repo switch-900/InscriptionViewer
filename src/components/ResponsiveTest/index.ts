@@ -1,0 +1,1 @@
+export { ResponsiveTest } from './ResponsiveTest';

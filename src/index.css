@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the Bitcoin Inscription Viewer */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom button hover effects */
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* Custom focus styles */
+input:focus, select:focus, textarea:focus, button:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #f97316;
+}
+
+/* Loading animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Custom gradient background */
+.bg-gradient-bitcoin {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fed7aa 100%);
+}
+
+/* Card hover effects */
+.inscription-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Inscription viewer responsive layout */
+.inscription-viewer {
+  width: 100%;
+  height: auto;
+}
+
+.inscription-card {
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1 / 1; /* Maintain square aspect ratio by default */
+}
+
+/* Responsive content containers */
+.inscription-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure images and videos are responsive */
+.inscription-content img,
+.inscription-content video {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Text content should fill available space */
+.inscription-content pre,
+.inscription-content .json-content {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive text sizing */
+@media (max-width: 640px) {
+  .text-4xl {
+    font-size: 2rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  .inscription-card {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+  .inscription-viewer {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .inscription-viewer {
+    grid-template-columns: 1fr !important;
+  }
+}

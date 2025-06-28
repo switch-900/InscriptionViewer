@@ -1,0 +1,48 @@
+# Source files
+src/
+public/
+docs/examples/
+tests/
+
+# Build tools and configs
+vite.config.ts
+rollup.config.js
+tsconfig.json
+tailwind.config.js
+postcss.config.js
+.eslintrc.*
+.prettierrc*
+
+# Development files
+.env*
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Demo build (keep only library build)
+dist/demo/
+index.html
+
+# Git and CI
+.git/
+.github/
+.gitignore
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+*.test.*
+*.spec.*
+__tests__/
+
+# Scripts
+scripts/

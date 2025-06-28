@@ -1,0 +1,99 @@
+{
+  "name": "bitcoin-inscription-viewer",
+  "version": "1.0.0",
+  "description": "🔍 A robust, production-ready React/TypeScript library for viewing Bitcoin Ordinals inscriptions with responsive design, multiple content type support, and flexible API endpoint configuration",
+  "main": "dist/lib/index.js",
+  "module": "dist/lib/index.esm.js",
+  "types": "dist/lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/lib/index.esm.js",
+      "require": "./dist/lib/index.js",
+      "types": "./dist/lib/index.d.ts"
+    },
+    "./styles": "./dist/lib/style.css"
+  },
+  "files": [
+    "dist/lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:lib && npm run build:demo",
+    "build:lib": "rollup -c",
+    "build:demo": "vite build",
+    "preview": "vite preview",
+    "start": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "type-check": "tsc --noEmit",
+    "health-check": "node scripts/health-check.js",
+    "clean": "rm -rf dist",
+    "deploy": "npm run build:demo && npm run preview",
+    "prepublishOnly": "npm run clean && npm run build:lib",
+    "publish:npm": "npm publish",
+    "publish:dry-run": "npm publish --dry-run"
+  },
+  "keywords": [
+    "bitcoin",
+    "inscriptions",
+    "ordinals",
+    "react",
+    "typescript",
+    "viewer",
+    "responsive",
+    "bitcoin-ordinals",
+    "ordinals-viewer",
+    "inscription-gallery",
+    "crypto",
+    "nft",
+    "web3",
+    "blockchain"
+  ],
+  "author": {
+    "name": "switch-900",
+    "email": "switch-900@users.noreply.github.com",
+    "url": "https://github.com/switch-900/bitcoin-inscription-viewer"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/switch-900/bitcoin-inscription-viewer#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/switch-900/bitcoin-inscription-viewer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/switch-900/bitcoin-inscription-viewer/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "type": "module",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@types/three": "^0.160.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.33",
+    "rollup": "^4.9.6",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "tailwindcss": "^3.4.1",
+    "terser": "^5.16.0",
+    "typescript": "^5.8.3",
+    "vite": "^5.0.12",
+    "vite-plugin-singlefile": "^2.2.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  }
+}

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Inscription Viewer - API Examples</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        .api-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .api-title {
+            color: #e67e22;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .api-description {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .api-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .test-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .test-button:hover {
+            background: #2980b9;
+        }
+        .result-area {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loading {
+            color: #f39c12;
+            font-style: italic;
+        }
+        .error {
+            color: #e74c3c;
+            font-style: italic;
+        }
+        .success {
+            color: #27ae60;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Bitcoin Inscription Viewer</h1>
+            <p class="subtitle">Interactive API Explorer for ordinals.com</p>
+        </div>
+
+        <div class="note">
+            <strong>📌 Note:</strong> This page demonstrates the different ordinals.com API endpoints. 
+            Click the test buttons to see live responses. <strong>Recursive endpoints (prefixed with /r/) are recommended 
+            as they don't require a full Bitcoin node and are more reliable for client applications.</strong>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">🎯 Interactive Endpoint Tester</div>
+            <div class="api-description">Enter any inscription ID and select an endpoint to test it dynamically</div>
+            <div style="display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; align-items: center;">
+                <input 
+                    type="text" 
+                    id="dynamic-inscription-id" 
+                    placeholder="Enter inscription ID (e.g., 6fb976ab...i0)"
+                    style="flex: 1; min-width: 300px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace;"
+                    value="6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0"
+                />
+                <select 
+                    id="endpoint-selector"
+                    style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-width: 200px;"
+                >
+                    <optgroup label="🔄 Recursive (Recommended)">
+                        <option value="r_inscription">Inscription Info</option>
+                        <option value="r_inscriptions">Latest Inscriptions</option>
+                        <option value="r_children">Child IDs</option>
+                        <option value="r_children_inscriptions">Child Details</option>
+                        <option value="r_parents">Parent IDs</option>
+                        <option value="r_metadata">Metadata</option>
+                    </optgroup>
+                    <optgroup label="📱 Node-Required">
+                        <option value="content">Content</option>
+                        <option value="inscription">Inscription JSON</option>
+                        <option value="inscriptions">Latest JSON</option>
+                        <option value="block">Block Info</option>
+                        <option value="sat">Satoshi Info</option>
+                        <option value="address">Address Assets</option>
+                    </optgroup>
+                </select>
+                <button 
+                    class="test-button"
+                    onclick="testDynamicEndpoint()"
+                    style="background: #e67e22; padding: 10px 20px;"
+                >
+                    🚀 Enter
+                </button>
+            </div>
+            <div id="dynamic-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">🔄 Recursive Endpoints (Recommended)</div>
+            <div class="api-description">These endpoints work without requiring a full Bitcoin node and are optimized for client applications.</div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">1. Inscription Info (Recursive)</div>
+            <div class="api-description">Get inscription information via recursive endpoint</div>
+            <div class="api-example">GET https://ordinals.com/r/inscription/6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0</div>
+            <button class="test-button" onclick="testEndpoint('r_inscription', '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0')">Test Recursive Inscription</button>
+            <div id="r_inscription-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">2. Latest Inscriptions (Recursive)</div>
+            <div class="api-description">Get latest inscriptions via recursive endpoint</div>
+            <div class="api-example">GET https://ordinals.com/r/inscriptions</div>
+            <button class="test-button" onclick="testEndpoint('r_inscriptions', '')">Test Recursive Latest</button>
+            <div id="r_inscriptions-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">3. Child Inscriptions (Recursive)</div>
+            <div class="api-description">Get child inscription IDs</div>
+            <div class="api-example">GET https://ordinals.com/r/children/e317a2a5d68bd1004ae15a06175a319272a10389ff125c98820389edef8b0a94i0</div>
+            <button class="test-button" onclick="testEndpoint('r_children', 'e317a2a5d68bd1004ae15a06175a319272a10389ff125c98820389edef8b0a94i0')">Test Child IDs</button>
+            <div id="r_children-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">4. Child Details (Recursive)</div>
+            <div class="api-description">Get detailed child inscription information</div>
+            <div class="api-example">GET https://ordinals.com/r/children/e317a2a5d68bd1004ae15a06175a319272a10389ff125c98820389edef8b0a94i0/inscriptions</div>
+            <button class="test-button" onclick="testEndpoint('r_children_inscriptions', 'e317a2a5d68bd1004ae15a06175a319272a10389ff125c98820389edef8b0a94i0')">Test Child Details</button>
+            <div id="r_children_inscriptions-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">5. Parent Inscriptions (Recursive)</div>
+            <div class="api-description">Get parent inscription IDs</div>
+            <div class="api-example">GET https://ordinals.com/r/parents/b1ef66c2d1a047cbaa6260b74daac43813924378fe08ef8545da4cb79e8fcf00i0</div>
+            <button class="test-button" onclick="testEndpoint('r_parents', 'b1ef66c2d1a047cbaa6260b74daac43813924378fe08ef8545da4cb79e8fcf00i0')">Test Parent IDs</button>
+            <div id="r_parents-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">6. Metadata (Recursive)</div>
+            <div class="api-description">Get hex-encoded CBOR metadata</div>
+            <div class="api-example">GET https://ordinals.com/r/metadata/b1ef66c2d1a047cbaa6260b74daac43813924378fe08ef8545da4cb79e8fcf00i0</div>
+            <button class="test-button" onclick="testEndpoint('r_metadata', 'b1ef66c2d1a047cbaa6260b74daac43813924378fe08ef8545da4cb79e8fcf00i0')">Test Metadata</button>
+            <div id="r_metadata-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">📱 Node-Required Endpoints</div>
+            <div class="api-description">These endpoints require access to a full Bitcoin node and may not always be available.</div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">1. Content Endpoint</div>
+            <div class="api-description">Get raw inscription content directly</div>
+            <div class="api-example">GET https://ordinals.com/content/6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0</div>
+            <button class="test-button" onclick="testEndpoint('content', '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0')">Test Content API</button>
+            <div id="content-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">2. Inscription Details (JSON)</div>
+            <div class="api-description">Get detailed inscription metadata as JSON</div>
+            <div class="api-example">
+GET https://ordinals.com/inscription/6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0
+Headers: Accept: application/json
+            </div>
+            <button class="test-button" onclick="testEndpoint('inscription', '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0')">Test Inscription API</button>
+            <div id="inscription-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">3. Latest Inscriptions (JSON)</div>
+            <div class="api-description">Get list of latest inscriptions</div>
+            <div class="api-example">
+GET https://ordinals.com/inscriptions
+Headers: Accept: application/json
+            </div>
+            <button class="test-button" onclick="testEndpoint('inscriptions', '')">Test Latest Inscriptions</button>
+            <div id="inscriptions-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">4. Block Information (JSON)</div>
+            <div class="api-description">Get block information by height or hash</div>
+            <div class="api-example">
+GET https://ordinals.com/block/767430
+Headers: Accept: application/json
+            </div>
+            <button class="test-button" onclick="testEndpoint('block', '767430')">Test Block API</button>
+            <div id="block-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">5. Satoshi Information (JSON)</div>
+            <div class="api-description">Get detailed information about a specific satoshi</div>
+            <div class="api-example">
+GET https://ordinals.com/sat/1023795949035695
+Headers: Accept: application/json
+            </div>
+            <button class="test-button" onclick="testEndpoint('sat', '1023795949035695')">Test Sat API</button>
+            <div id="sat-result" class="result-area" style="display:none;"></div>
+        </div>
+
+        <div class="api-section">
+            <div class="api-title">6. Address Assets (JSON)</div>
+            <div class="api-description">Get all assets (inscriptions, runes) for an address</div>
+            <div class="api-example">
+GET https://ordinals.com/address/bc1pdrm7tcyk4k6c3cdcjwkp49jmfrwmtvt0dvqyy7y4qp79tgks4lmqdpj6rw
+Headers: Accept: application/json
+            </div>
+            <button class="test-button" onclick="testEndpoint('address', 'bc1pdrm7tcyk4k6c3cdcjwkp49jmfrwmtvt0dvqyy7y4qp79tgks4lmqdpj6rw')">Test Address API</button>
+            <div id="address-result" class="result-area" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testEndpoint(type, value) {
+            const resultDiv = document.getElementById(type + '-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading">🔄 Loading...</div>';
+
+            let url;
+            const headers = {};
+
+            switch (type) {
+                case 'content':
+                    url = `https://ordinals.com/content/${value}`;
+                    break;
+                case 'r_inscription':
+                    url = `https://ordinals.com/r/inscription/${value}`;
+                    break;
+                case 'r_inscriptions':
+                    url = 'https://ordinals.com/r/inscriptions';
+                    break;
+                case 'r_children':
+                    url = `https://ordinals.com/r/children/${value}`;
+                    break;
+                case 'r_children_inscriptions':
+                    url = `https://ordinals.com/r/children/${value}/inscriptions`;
+                    break;
+                case 'r_parents':
+                    url = `https://ordinals.com/r/parents/${value}`;
+                    break;
+                case 'r_metadata':
+                    url = `https://ordinals.com/r/metadata/${value}`;
+                    break;
+                case 'inscription':
+                    url = `https://ordinals.com/inscription/${value}`;
+                    headers['Accept'] = 'application/json';
+                    break;
+                case 'inscriptions':
+                    url = 'https://ordinals.com/inscriptions';
+                    headers['Accept'] = 'application/json';
+                    break;
+                case 'block':
+                    url = `https://ordinals.com/block/${value}`;
+                    headers['Accept'] = 'application/json';
+                    break;
+                case 'sat':
+                    url = `https://ordinals.com/sat/${value}`;
+                    headers['Accept'] = 'application/json';
+                    break;
+                case 'address':
+                    url = `https://ordinals.com/address/${value}`;
+                    headers['Accept'] = 'application/json';
+                    break;
+            }
+
+            try {
+                const response = await fetch(url, { headers });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+                let content;
+                let displayContent;
+
+                if (contentType.includes('application/json')) {
+                    content = await response.json();
+                    displayContent = JSON.stringify(content, null, 2);
+                } else if (contentType.includes('text/')) {
+                    content = await response.text();
+                    displayContent = content;
+                } else if (contentType.startsWith('image/')) {
+                    const blob = await response.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    displayContent = `<img src="${objectUrl}" style="max-width: 100%; height: auto;" alt="Inscription content" />`;
+                } else {
+                    displayContent = `Binary content (${contentType}) - ${response.headers.get('content-length') || 'unknown'} bytes`;
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Success (${contentType})</div>
+                    <strong>URL:</strong> ${url}<br>
+                    <strong>Content:</strong><br>
+                    <pre>${displayContent}</pre>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                    <strong>URL:</strong> ${url}
+                `;
+            }
+        }
+
+        async function testEndpoint(endpoint, resultId, description) {
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.innerHTML = `
+                <div class="status loading">🔄 Loading ${description}...</div>
+            `;
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const contentType = response.headers.get('content-type');
+                let content;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    content = await response.json();
+                    content = JSON.stringify(content, null, 2);
+                } else {
+                    content = await response.text();
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="status success">✅ Success - ${description}</div>
+                    <div class="headers">
+                        <strong>URL:</strong> <code>${endpoint}</code><br>
+                        <strong>Status:</strong> ${response.status} ${response.statusText}<br>
+                        <strong>Content-Type:</strong> ${contentType || 'N/A'}
+                    </div>
+                    <pre class="response">${content}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">❌ Error - ${error.message}</div>
+                    <div class="headers">
+                        <strong>Endpoint:</strong> <code>${endpoint}</code>
+                    </div>
+                    <pre class="response">Failed to fetch: ${error.message}</pre>
+                `;
+            }
+        }
+
+        async function testDynamicEndpoint() {
+            const inscriptionId = document.getElementById('dynamic-inscription-id').value.trim();
+            const endpointType = document.getElementById('endpoint-selector').value;
+            
+            if (!inscriptionId) {
+                alert('Please enter an inscription ID');
+                return;
+            }
+            
+            const baseUrl = 'https://ordinals.com';
+            let endpoint = '';
+            let description = '';
+            
+            switch (endpointType) {
+                case 'r_inscription':
+                    endpoint = `${baseUrl}/r/inscription/${inscriptionId}`;
+                    description = 'Recursive Inscription Info';
+                    break;
+                case 'r_inscriptions':
+                    endpoint = `${baseUrl}/r/inscriptions`;
+                    description = 'Recursive Latest Inscriptions';
+                    break;
+                case 'r_children':
+                    endpoint = `${baseUrl}/r/children/${inscriptionId}`;
+                    description = 'Recursive Child IDs';
+                    break;
+                case 'r_children_inscriptions':
+                    endpoint = `${baseUrl}/r/children/${inscriptionId}/inscriptions`;
+                    description = 'Recursive Child Details';
+                    break;
+                case 'r_parents':
+                    endpoint = `${baseUrl}/r/parents/${inscriptionId}`;
+                    description = 'Recursive Parent IDs';
+                    break;
+                case 'r_metadata':
+                    endpoint = `${baseUrl}/r/metadata/${inscriptionId}`;
+                    description = 'Recursive Metadata';
+                    break;
+                case 'content':
+                    endpoint = `${baseUrl}/content/${inscriptionId}`;
+                    description = 'Content (Node Required)';
+                    break;
+                case 'inscription':
+                    endpoint = `${baseUrl}/inscription/${inscriptionId}`;
+                    description = 'Inscription JSON (Node Required)';
+                    break;
+                case 'inscriptions':
+                    endpoint = `${baseUrl}/inscriptions`;
+                    description = 'Latest Inscriptions JSON (Node Required)';
+                    break;
+                case 'block':
+                    endpoint = `${baseUrl}/block/${inscriptionId}`;
+                    description = 'Block Info (Node Required)';
+                    break;
+                case 'sat':
+                    endpoint = `${baseUrl}/sat/${inscriptionId}`;
+                    description = 'Satoshi Info (Node Required)';
+                    break;
+                case 'address':
+                    endpoint = `${baseUrl}/output/${inscriptionId}`;
+                    description = 'Address Assets (Node Required)';
+                    break;
+                default:
+                    alert('Invalid endpoint type');
+                    return;
+            }
+            
+            await testEndpoint(endpoint, 'dynamic-result', description);
+        }
+
+        // Allow Enter key to trigger the test
+        document.addEventListener('DOMContentLoaded', function() {
+            const inscriptionInput = document.getElementById('dynamic-inscription-id');
+            if (inscriptionInput) {
+                inscriptionInput.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        testDynamicEndpoint();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
