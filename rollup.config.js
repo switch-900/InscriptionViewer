@@ -28,10 +28,9 @@ export default defineConfig({
     }),
     commonjs(),
     typescript({
-      tsconfig: './tsconfig.json',
+      tsconfig: './tsconfig.lib.json',
       declaration: true,
-      declarationDir: 'dist/lib',
-      exclude: ['**/*.test.*', '**/*.stories.*', 'src/main.tsx', 'src/App.tsx', 'src/data/**']
+      declarationDir: 'dist/lib'
     }),
     terser()
   ],

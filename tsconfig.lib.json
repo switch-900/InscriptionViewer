@@ -1,0 +1,29 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist/lib"
+  },
+  "include": [
+    "src/lib.ts",
+    "src/components/InscriptionViewer/**/*",
+    "src/components/InscriptionGallery/**/*", 
+    "src/components/LaserEyesInscriptionGallery/**/*",
+    "src/components/ui/**/*",
+    "src/types/**/*",
+    "src/services/**/*",
+    "src/hooks/**/*",
+    "src/utils/**/*"
+  ],
+  "exclude": [
+    "**/*.test.*",
+    "**/*.stories.*", 
+    "src/main.tsx",
+    "src/App.tsx",
+    "src/data/**",
+    "src/components/LiveDemo/**",
+    "src/components/ResponsiveTest/**",
+    "src/components/DebugInscriptionTest.tsx"
+  ]
+}

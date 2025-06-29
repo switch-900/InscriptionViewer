@@ -4,12 +4,12 @@
   "description": "🔍 A robust, production-ready React/TypeScript library for viewing Bitcoin Ordinals inscriptions with responsive design, multiple content type support, and flexible API endpoint configuration",
   "main": "dist/lib/index.js",
   "module": "dist/lib/index.esm.js",
-  "types": "dist/lib/index.d.ts",
+  "types": "dist/lib/lib.d.ts",
   "exports": {
     ".": {
       "import": "./dist/lib/index.esm.js",
       "require": "./dist/lib/index.js",
-      "types": "./dist/lib/index.d.ts"
+      "types": "./dist/lib/lib.d.ts"
     },
     "./styles": "./dist/lib/style.css"
   },
@@ -88,6 +88,7 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "tailwindcss": "^3.4.1",
     "terser": "^5.16.0",
+    "tslib": "^2.8.1",
     "typescript": "^5.8.3",
     "vite": "^5.0.12",
     "vite-plugin-singlefile": "^2.2.0"

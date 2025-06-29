@@ -7,9 +7,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Build outputs
-dist/
+dist/lib/
 build/
 *.tsbuildinfo
+
+# Allow demo build for GitHub Pages
+!dist/demo/
 
 # Environment variables
 .env
