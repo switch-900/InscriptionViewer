@@ -1,0 +1,53 @@
+# Jekyll configuration for GitHub Pages
+title: "Bitcoin Inscription Viewer"
+description: "A React library for displaying Bitcoin Ordinals inscriptions"
+baseurl: "/InscriptionViewer"
+url: "https://switch-900.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Include/Exclude files
+include:
+  - README.md
+  - docs/
+
+exclude:
+  - node_modules/
+  - dist/
+  - src/
+  - tests/
+  - "*.json"
+  - "*.js"
+  - "*.ts"
+  - "*.tsx"
+  - ".gitignore"
+  - ".eslintrc*"
+  - ".prettierrc"
+  - "*.config.*"
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "docs"
+    values:
+      layout: "default"
