@@ -272,6 +272,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+```yaml
+{% raw %}
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
@@ -282,6 +284,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+{% endraw %}
 ```
 
 ### CDN Distribution
@@ -334,6 +337,8 @@ name: CI/CD Pipeline
 
 on:
   push:
+```yaml
+{% raw %}
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
@@ -363,9 +368,12 @@ jobs:
         with:
           name: dist-${{ matrix.node-version }}
           path: dist/
+{% endraw %}
 
   publish:
     needs: test
+```yaml
+{% raw %}
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
@@ -383,6 +391,7 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+{% endraw %}
 ```
 
 ### Quality Checks

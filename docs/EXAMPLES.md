@@ -673,6 +673,7 @@ function InteractiveControlsExample() {
           </div>
         </div>
 
+{% raw %}
         {/* Inscription Display */}
         <div 
           className="border rounded-lg overflow-hidden"
@@ -683,6 +684,7 @@ function InteractiveControlsExample() {
             className="w-full h-full"
             showHeader={controls.showHeader}
             showControls={controls.showControls}
+{% endraw %}
             autoLoad={controls.autoLoad}
             size={controls.size}
           />

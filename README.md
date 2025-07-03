@@ -85,6 +85,7 @@ function App() {
 ### Individual Inscription
 
 ```tsx
+{% raw %}
 import { InscriptionRenderer } from 'bitcoin-inscription-viewer';
 
 function SingleInscription() {
@@ -98,6 +99,7 @@ function SingleInscription() {
         autoLoad={true}
       />
     </div>
+{% endraw %}
   );
 }
 ```

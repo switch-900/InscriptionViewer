@@ -62,6 +62,7 @@ function MyWallet() {
 ### 4. Enhanced Optimization Features
 
 ```tsx
+{% raw %}
 import { EnhancedInscriptionViewer, useInscriptionCache } from 'bitcoin-inscription-viewer'
 
 function OptimizedWallet() {
@@ -110,6 +111,7 @@ function OptimizedWallet() {
     />
   )
 }
+{% endraw %}
 ```
 
 ## 📋 API Reference
