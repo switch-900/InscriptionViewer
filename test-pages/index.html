@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Inscription Viewer - Test Pages</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 0;
+            background: #0f0f23;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem;
+            background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #4c1d95 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .header h1 {
+            margin: 0 0 1rem 0;
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 0;
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .test-card {
+            background: linear-gradient(135deg, #262447 0%, #3730a3 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+        }
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
+            border-color: #8b5cf6;
+            text-decoration: none;
+            color: #e2e8f0;
+        }
+        .test-card h3 {
+            margin: 0 0 1rem 0;
+            color: #8b5cf6;
+            font-size: 1.5rem;
+        }
+        .test-card p {
+            margin: 0 0 1.5rem 0;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        .test-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .test-card .features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .test-card .features li {
+            padding: 0.25rem 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .test-card .features li:before {
+            content: "✨ ";
+            color: #8b5cf6;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin: 0.25rem 0.25rem 0 0;
+        }
+        .nav-back {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4c1d95 0%, #6366f1 100%);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        .nav-back:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            color: #cbd5e1;
+        }
+        footer a {
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="nav-back">← Back to Main Site</a>
+        
+        <div class="header">
+            <h1>🧪 Test Pages</h1>
+            <p>Interactive examples and test cases for the Bitcoin Inscription Viewer library</p>
+        </div>
+
+        <div class="test-grid">
+            <a href="./basic-usage.html" class="test-card">
+                <span class="icon">🚀</span>
+                <h3>Basic Usage</h3>
+                <p>Simple examples showing how to get started with the library using different data formats.</p>
+                <ul class="features">
+                    <li>Array of inscription IDs</li>
+                    <li>API response formats</li>
+                    <li>Basic configuration options</li>
+                </ul>
+                <div>
+                    <span class="badge">Beginner</span>
+                    <span class="badge">Quick Start</span>
+                </div>
+            </a>
+
+            <a href="./advanced-usage.html" class="test-card">
+                <span class="icon">⚙️</span>
+                <h3>Advanced Usage</h3>
+                <p>Advanced configuration options with interactive controls for customizing the gallery.</p>
+                <ul class="features">
+                    <li>Interactive grid controls</li>
+                    <li>Lazy loading options</li>
+                    <li>Modal configurations</li>
+                </ul>
+                <div>
+                    <span class="badge">Advanced</span>
+                    <span class="badge">Interactive</span>
+                </div>
+            </a>
+
+            <a href="./lasereyes-integration.html" class="test-card">
+                <span class="icon">🔗</span>
+                <h3>LaserEyes Integration</h3>
+                <p>Wallet integration examples showing how to connect with LaserEyes and fetch user inscriptions.</p>
+                <ul class="features">
+                    <li>Wallet connection</li>
+                    <li>User inscription fetching</li>
+                    <li>Different view modes</li>
+                </ul>
+                <div>
+                    <span class="badge">Wallet</span>
+                    <span class="badge">Integration</span>
+                </div>
+            </a>
+
+            <a href="./modal-usage.html" class="test-card">
+                <span class="icon">🖼️</span>
+                <h3>Modal Usage</h3>
+                <p>Examples of using inscription modals with different trigger types and configurations.</p>
+                <ul class="features">
+                    <li>Different modal sizes</li>
+                    <li>Custom triggers</li>
+                    <li>Text link integration</li>
+                </ul>
+                <div>
+                    <span class="badge">UI/UX</span>
+                    <span class="badge">Modals</span>
+                </div>
+            </a>
+
+            <a href="./gallery-showcase.html" class="test-card">
+                <span class="icon">🎨</span>
+                <h3>Gallery Showcase</h3>
+                <p>Various gallery layouts and styles to demonstrate the flexibility of the component.</p>
+                <ul class="features">
+                    <li>Virtual scrolling demo</li>
+                    <li>Responsive grid layouts</li>
+                    <li>Custom card styling</li>
+                    <li>Click handling</li>
+                </ul>
+                <div>
+                    <span class="badge">Gallery</span>
+                    <span class="badge">Virtual Scrolling</span>
+                </div>
+            </a>
+
+            <a href="./optimization-demo.html" class="test-card">
+                <span class="icon">⚡</span>
+                <h3>Optimization Demo</h3>
+                <p>Advanced performance optimization features including caching, batch fetching, and monitoring.</p>
+                <ul class="features">
+                    <li>LRU cache demo</li>
+                    <li>Performance metrics</li>
+                    <li>Batch fetching</li>
+                    <li>Service worker support</li>
+                </ul>
+                <div>
+                    <span class="badge">Performance</span>
+                    <span class="badge">Caching</span>
+                </div>
+            </a>
+
+            <a href="./error-handling.html" class="test-card">
+                <span class="icon">⚠️</span>
+                <h3>Error Handling</h3>
+                <p>Examples of how the library handles errors, loading states, and edge cases gracefully.</p>
+                <ul class="features">
+                    <li>Network error recovery</li>
+                    <li>Retry mechanisms</li>
+                    <li>Graceful degradation</li>
+                    <li>User-friendly messages</li>
+                </ul>
+                <div>
+                    <span class="badge">Error Handling</span>
+                    <span class="badge">Reliability</span>
+                </div>
+            </a>
+
+            <a href="./complete-showcase.html" class="test-card">
+                <span class="icon">🎯</span>
+                <h3>Complete Showcase</h3>
+                <p>Comprehensive demonstration of all features in one interactive showcase with comparisons.</p>
+                <ul class="features">
+                    <li>All features in one place</li>
+                    <li>Interactive tabs</li>
+                    <li>Feature comparison table</li>
+                    <li>Quick start guide</li>
+                </ul>
+                <div>
+                    <span class="badge">Complete</span>
+                    <span class="badge">Interactive</span>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            <p>Built with ❤️ for the Bitcoin ecosystem</p>
+            <p>
+                <a href="https://github.com/switch-900/InscriptionViewer">GitHub</a> • 
+                <a href="https://www.npmjs.com/package/bitcoin-inscription-viewer">NPM</a> • 
+                <a href="../docs/index.html">Documentation</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

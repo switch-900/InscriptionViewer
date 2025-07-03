@@ -1,0 +1,461 @@
+8<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaserEyes Integration - Bitcoin Inscription Viewer Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 0;
+            background: #0f0f23;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .nav-back {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4c1d95 0%, #6366f1 100%);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        .nav-back:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #4c1d95 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .section {
+            background: linear-gradient(135deg, #262447 0%, #3730a3 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+        }
+        .section h2 {
+            color: #8b5cf6;
+            margin-top: 0;
+        }
+        .wallet-status {
+            background: #1e1e3f;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        .status-connected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+        }
+        .status-disconnected {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4c1d95 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.25rem;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #047857 0%, #10b981 100%);
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%);
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%);
+        }
+        .code-block {
+            background: #0f0f23;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            margin: 0;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+        }
+        .demo-area {
+            background: #1e1e3f;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        .gallery-placeholder {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .card-placeholder {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            text-align: center;
+            padding: 1rem;
+            border: 2px dashed rgba(139, 92, 246, 0.3);
+        }
+        .success-state {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-color: #10b981;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: #cbd5e1;
+        }
+        .feature-list li:before {
+            content: "🔥 ";
+            color: #f59e0b;
+        }
+        .integration-steps {
+            background: #1e1e3f;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        .step-number {
+            background: #8b5cf6;
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+        .step-content h4 {
+            color: #8b5cf6;
+            margin: 0 0 0.5rem 0;
+        }
+        .step-content p {
+            color: #cbd5e1;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="nav-back">← Back to Test Pages</a>
+        
+        <div class="header">
+            <h1>🔗 LaserEyes Wallet Integration</h1>
+            <p>Examples of integrating with LaserEyes wallet for Bitcoin inscription management</p>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Quick Start with LaserEyes</h2>
+            <p style="color: #cbd5e1;">LaserEyes provides direct access to Bitcoin node functionality, allowing you to fetch inscription content without relying on external APIs.</p>
+            
+            <div class="integration-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Install LaserEyes</h4>
+                        <p>Add the LaserEyes provider to your project</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Wrap Your App</h4>
+                        <p>Provide wallet context to your application</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Use the Gallery</h4>
+                        <p>Display inscriptions from the connected wallet</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <pre># Install dependencies
+npm install @omnisat/lasereyes bitcoin-inscription-viewer
+
+# Import and use
+import { LaserEyesProvider } from '@omnisat/lasereyes';
+import { LaserEyesInscriptionGallery } from 'bitcoin-inscription-viewer';
+
+function App() {
+  return (
+    &lt;LaserEyesProvider&gt;
+      &lt;LaserEyesInscriptionGallery
+        columns={3}
+        cardSize={250}
+        enableModal={true}
+      /&gt;
+    &lt;/LaserEyesProvider&gt;
+  );
+}</pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💳 Wallet Connection Demo</h2>
+            <p style="color: #cbd5e1;">Simulate wallet connection and inscription fetching:</p>
+            
+            <div class="wallet-status" id="wallet-status">
+                <h3 style="margin-top: 0; color: #ef4444;">❌ Wallet Disconnected</h3>
+                <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Connect your LaserEyes wallet to view your inscriptions</p>
+                <button class="btn" onclick="toggleWallet()">🔗 Connect Wallet</button>
+            </div>
+
+            <div class="demo-area" id="inscription-area" style="display: none;">
+                <h4 style="margin-top: 0; color: #8b5cf6;">Your Inscriptions:</h4>
+                <div class="gallery-placeholder">
+                    <div class="card-placeholder success-state">
+                        <div>📝 Genesis<br><small>Your first inscription</small></div>
+                    </div>
+                    <div class="card-placeholder success-state">
+                        <div>🖼️ Art Piece<br><small>Digital artwork</small></div>
+                    </div>
+                    <div class="card-placeholder success-state">
+                        <div>🎵 Music NFT<br><small>Audio inscription</small></div>
+                    </div>
+                </div>
+                <p style="color: #10b981; margin: 1rem 0 0 0;">✅ Successfully loaded 3 inscriptions from wallet</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Advanced LaserEyes Features</h2>
+            
+            <div class="code-block">
+                <pre>// Custom content fetcher using LaserEyes
+import { useLaserEyes } from '@omnisat/lasereyes';
+
+function CustomInscriptionViewer() {
+  const { getInscriptionContent, isConnected } = useLaserEyes();
+  
+  const customFetcher = async (inscriptionId) => {
+    if (!isConnected) throw new Error('Wallet not connected');
+    return await getInscriptionContent(inscriptionId);
+  };
+
+  return (
+    &lt;EnhancedInscriptionViewer
+      inscriptions={inscriptionIds}
+      contentFetcher={customFetcher}
+      cacheConfig={{
+        enabled: true,
+        maxSize: 500,
+        ttl: 600000
+      }}
+      performanceOptions={{
+        batchSize: 10,
+        maxConcurrency: 5
+      }}
+    /&gt;
+  );
+}</pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 LaserEyes Benefits</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div style="background: #1e1e3f; padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                    <h4 style="color: #8b5cf6; margin-top: 0;">🚀 Direct Node Access</h4>
+                    <ul class="feature-list">
+                        <li>No external API dependencies</li>
+                        <li>Faster content fetching</li>
+                        <li>Real-time data access</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #1e1e3f; padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                    <h4 style="color: #8b5cf6; margin-top: 0;">🔒 Enhanced Security</h4>
+                    <ul class="feature-list">
+                        <li>Direct wallet integration</li>
+                        <li>Secure transaction signing</li>
+                        <li>Private key management</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #1e1e3f; padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                    <h4 style="color: #8b5cf6; margin-top: 0;">⚡ Performance</h4>
+                    <ul class="feature-list">
+                        <li>Built-in caching strategies</li>
+                        <li>Optimized batch requests</li>
+                        <li>Reduced network latency</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📱 Different View Modes</h2>
+            <p style="color: #cbd5e1;">The LaserEyesInscriptionGallery supports multiple display modes:</p>
+            
+            <div class="code-block">
+                <pre>// Gallery view (default)
+&lt;LaserEyesInscriptionGallery
+  columns={3}
+  cardSize={250}
+  showIndex={true}
+  enableModal={true}
+/&gt;
+
+// Compact view
+&lt;LaserEyesInscriptionGallery
+  columns={6}
+  cardSize={120}
+  showIndex={false}
+  enableModal={true}
+/&gt;
+
+// Showcase view
+&lt;LaserEyesInscriptionGallery
+  columns={2}
+  cardSize={300}
+  showIndex={true}
+  enableModal={true}
+  filter={(inscription) => inscription.number < 1000} // Show rare inscriptions
+/&gt;</pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🛠️ Error Handling & Loading States</h2>
+            
+            <div class="code-block">
+                <pre>function WalletInscriptionViewer() {
+  const { isConnected, isConnecting, connect } = useLaserEyes();
+  
+  if (isConnecting) {
+    return &lt;div&gt;Connecting to wallet...&lt;/div&gt;;
+  }
+  
+  if (!isConnected) {
+    return (
+      &lt;div&gt;
+        &lt;button onClick={connect}&gt;Connect LaserEyes Wallet&lt;/button&gt;
+      &lt;/div&gt;
+    );
+  }
+  
+  return (
+    &lt;LaserEyesInscriptionGallery
+      columns={3}
+      cardSize={200}
+      enableModal={true}
+      onError={(error) => console.error('Inscription error:', error)}
+      onInscriptionClick={(inscription) => {
+        // Handle clicks - could navigate, show details, etc.
+        console.log('Clicked inscription:', inscription);
+      }}
+    /&gt;
+  );
+}</pre>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: linear-gradient(135deg, #1e1e3f 0%, #3730a3 100%); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.2);">
+            <h3 style="color: #8b5cf6; margin-top: 0;">🎯 Ready to Integrate?</h3>
+            <p style="margin-bottom: 1.5rem; color: #cbd5e1;">Check out these related examples:</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="./optimization-features.html" class="btn">⚡ Performance Features</a>
+                <a href="./modal-usage.html" class="btn">🖼️ Modal Examples</a>
+                <a href="./api-integration.html" class="btn">🌐 API Integration</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let walletConnected = false;
+        
+        function toggleWallet() {
+            const statusElement = document.getElementById('wallet-status');
+            const inscriptionArea = document.getElementById('inscription-area');
+            
+            walletConnected = !walletConnected;
+            
+            if (walletConnected) {
+                statusElement.className = 'wallet-status status-connected';
+                statusElement.innerHTML = `
+                    <h3 style="margin-top: 0; color: #10b981;">✅ Wallet Connected</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 1rem;">Address: bc1p...example...address</p>
+                    <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Successfully connected to LaserEyes wallet</p>
+                    <button class="btn btn-danger" onclick="toggleWallet()">🔌 Disconnect</button>
+                `;
+                inscriptionArea.style.display = 'block';
+            } else {
+                statusElement.className = 'wallet-status status-disconnected';
+                statusElement.innerHTML = `
+                    <h3 style="margin-top: 0; color: #ef4444;">❌ Wallet Disconnected</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Connect your LaserEyes wallet to view your inscriptions</p>
+                    <button class="btn" onclick="toggleWallet()">🔗 Connect Wallet</button>
+                `;
+                inscriptionArea.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

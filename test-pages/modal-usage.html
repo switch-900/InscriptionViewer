@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Usage - Bitcoin Inscription Viewer Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 0;
+            background: #0f0f23;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .nav-back {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4c1d95 0%, #6366f1 100%);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        .nav-back:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #4c1d95 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .section {
+            background: linear-gradient(135deg, #262447 0%, #3730a3 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+        }
+        .section h2 {
+            color: #8b5cf6;
+            margin-top: 0;
+        }
+        .demo-area {
+            background: #1e1e3f;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4c1d95 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.25rem;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #8b5cf6;
+            color: #8b5cf6;
+        }
+        .btn-outline:hover {
+            background: #8b5cf6;
+            color: white;
+        }
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+        }
+        .code-block {
+            background: #0f0f23;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            margin: 0;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+        }
+        .modal-size-demo {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+        .feature-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .feature-card {
+            background: #1e1e3f;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            text-align: center;
+        }
+        .feature-card h4 {
+            color: #8b5cf6;
+            margin: 0 0 1rem 0;
+        }
+        .feature-card p {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .text-link {
+            color: #8b5cf6;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .text-link:hover {
+            color: #a855f7;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #262447 0%, #3730a3 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+        }
+        .modal-sm { width: 400px; }
+        .modal-md { width: 600px; }
+        .modal-lg { width: 800px; }
+        .modal-xl { width: 1000px; }
+        .modal-full { 
+            width: 95vw; 
+            height: 95vh; 
+            max-width: none;
+            max-height: none;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #ef4444;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+        }
+        .modal-close:hover {
+            background: #ef4444;
+            color: white;
+        }
+        .inscription-preview {
+            background: #0f0f23;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        .inscription-preview h3 {
+            color: #8b5cf6;
+            margin-top: 0;
+        }
+        .inscription-controls {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="nav-back">← Back to Test Pages</a>
+        
+        <div class="header">
+            <h1>🖼️ Modal Usage Examples</h1>
+            <p>Interactive examples showing different ways to use inscription modals</p>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Basic Modal Usage</h2>
+            <p style="color: #cbd5e1;">The simplest way to display inscriptions in modals:</p>
+            
+            <div class="code-block">
+                <pre>import { InscriptionModal } from 'bitcoin-inscription-viewer';
+
+// Basic modal with default trigger button
+&lt;InscriptionModal
+  inscriptionId="dca3da701a2607de6c89dd0bfe6106532dcefe279d13b105301a2d85eb4ffaafi0"
+  inscriptionNumber="1"
+  modalSize="lg"
+  showTriggerButton={true}
+/&gt;</pre>
+            </div>
+
+            <div class="demo-area">
+                <h4 style="margin-top: 0; color: #8b5cf6;">Demo:</h4>
+                <button class="btn" onclick="openModal('modal-basic')">🖼️ View Inscription</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎨 Custom Trigger Buttons</h2>
+            <p style="color: #cbd5e1;">Use custom buttons and elements to trigger modals:</p>
+            
+            <div class="code-block">
+                <pre>// Custom button trigger
+&lt;InscriptionModal
+  inscriptionId="inscription-id"
+  inscriptionNumber="1"
+  modalSize="xl"
+  trigger={
+    &lt;Button variant="outline" size="lg"&gt;
+      🎨 View Inscription Art
+    &lt;/Button&gt;
+  }
+/&gt;
+
+// Image thumbnail trigger
+&lt;InscriptionModal
+  inscriptionId="inscription-id"
+  modalSize="lg"
+  trigger={
+    &lt;img 
+      src="thumbnail.jpg" 
+      alt="Click to view full size"
+      className="cursor-pointer hover:opacity-80"
+    /&gt;
+  }
+/&gt;</pre>
+            </div>
+
+            <div class="demo-area">
+                <h4 style="margin-top: 0; color: #8b5cf6;">Demo:</h4>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                    <button class="btn btn-outline btn-lg" onclick="openModal('modal-custom')">🎨 View Inscription Art</button>
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;" onclick="openModal('modal-thumbnail')">🖼️</div>
+                    <span style="color: #cbd5e1; font-size: 0.9rem;">← Click thumbnail</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📏 Different Modal Sizes</h2>
+            <p style="color: #cbd5e1;">Choose the appropriate size for your content:</p>
+            
+            <div class="code-block">
+                <pre>// Small modal (400px)
+&lt;InscriptionModal modalSize="sm" ... /&gt;
+
+// Medium modal (600px) 
+&lt;InscriptionModal modalSize="md" ... /&gt;
+
+// Large modal (800px)
+&lt;InscriptionModal modalSize="lg" ... /&gt;
+
+// Extra large modal (1000px)
+&lt;InscriptionModal modalSize="xl" ... /&gt;
+
+// Full screen modal
+&lt;InscriptionModal modalSize="full" ... /&gt;</pre>
+            </div>
+
+            <div class="demo-area">
+                <h4 style="margin-top: 0; color: #8b5cf6;">Demo - Try Different Sizes:</h4>
+                <div class="modal-size-demo">
+                    <button class="btn btn-sm" onclick="openModal('modal-sm')">Small</button>
+                    <button class="btn btn-sm" onclick="openModal('modal-md')">Medium</button>
+                    <button class="btn btn-sm" onclick="openModal('modal-lg')">Large</button>
+                    <button class="btn btn-sm" onclick="openModal('modal-xl')">Extra Large</button>
+                    <button class="btn btn-sm" onclick="openModal('modal-full')">Full Screen</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Text Link Integration</h2>
+            <p style="color: #cbd5e1;">Seamlessly integrate modals within text content:</p>
+            
+            <div class="code-block">
+                <pre>function Article() {
+  return (
+    &lt;p&gt;
+      The first Bitcoin inscription, known as the 
+      &lt;InscriptionModal
+        inscriptionId="genesis-inscription-id"
+        modalSize="lg"
+        trigger={
+          &lt;span className="text-link"&gt;
+            Genesis inscription
+          &lt;/span&gt;
+        }
+      /&gt;
+      , was created on block 767,430...
+    &lt;/p&gt;
+  );
+}</pre>
+            </div>
+
+            <div class="demo-area">
+                <h4 style="margin-top: 0; color: #8b5cf6;">Demo:</h4>
+                <p style="color: #cbd5e1; line-height: 1.6;">
+                    The first Bitcoin inscription, known as the 
+                    <span class="text-link" onclick="openModal('modal-genesis')">Genesis inscription</span>, 
+                    was created on block 767,430. This historic moment marked the beginning of the 
+                    <span class="text-link" onclick="openModal('modal-ordinals')">Bitcoin Ordinals protocol</span>
+                    and opened up new possibilities for digital art and data storage on the Bitcoin blockchain.
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚙️ Advanced Modal Features</h2>
+            
+            <div class="feature-showcase">
+                <div class="feature-card">
+                    <h4>🔍 Zoom Controls</h4>
+                    <p>Built-in zoom functionality for detailed viewing of inscription content.</p>
+                    <button class="btn btn-sm" onclick="openModal('modal-zoom')">Try Zoom</button>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>💾 Download Option</h4>
+                    <p>Allow users to download inscription content directly from the modal.</p>
+                    <button class="btn btn-sm" onclick="openModal('modal-download')">Try Download</button>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>📋 Copy to Clipboard</h4>
+                    <p>Quick copy functionality for inscription IDs and content URLs.</p>
+                    <button class="btn btn-sm" onclick="openModal('modal-copy')">Try Copy</button>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>🔄 Navigation</h4>
+                    <p>Navigate between multiple inscriptions within the same modal.</p>
+                    <button class="btn btn-sm" onclick="openModal('modal-nav')">Try Navigation</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📱 Responsive Behavior</h2>
+            <p style="color: #cbd5e1;">Modals automatically adapt to different screen sizes:</p>
+            
+            <div class="code-block">
+                <pre>// Responsive modal that adapts to screen size
+&lt;InscriptionModal
+  inscriptionId="inscription-id"
+  modalSize="lg"  // Will be smaller on mobile
+  responsive={true}
+  mobileFullscreen={true}  // Full screen on mobile devices
+/&gt;</pre>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+                <div style="background: #1e1e3f; padding: 1rem; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.2); text-align: center;">
+                    <h5 style="color: #8b5cf6; margin: 0 0 0.5rem 0;">🖥️ Desktop</h5>
+                    <p style="color: #cbd5e1; font-size: 0.8rem;">Large modals with full controls</p>
+                </div>
+                <div style="background: #1e1e3f; padding: 1rem; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.2); text-align: center;">
+                    <h5 style="color: #8b5cf6; margin: 0 0 0.5rem 0;">📱 Tablet</h5>
+                    <p style="color: #cbd5e1; font-size: 0.8rem;">Medium size with touch controls</p>
+                </div>
+                <div style="background: #1e1e3f; padding: 1rem; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.2); text-align: center;">
+                    <h5 style="color: #8b5cf6; margin: 0 0 0.5rem 0;">📱 Mobile</h5>
+                    <p style="color: #cbd5e1; font-size: 0.8rem;">Full screen for optimal viewing</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: linear-gradient(135deg, #1e1e3f 0%, #3730a3 100%); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.2);">
+            <h3 style="color: #8b5cf6; margin-top: 0;">🎯 Explore More</h3>
+            <p style="margin-bottom: 1.5rem; color: #cbd5e1;">Check out other features and examples:</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="./gallery-showcase.html" class="btn">🎨 Gallery Showcase</a>
+                <a href="./optimization-features.html" class="btn">⚡ Performance Features</a>
+                <a href="./error-handling.html" class="btn">⚠️ Error Handling</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Examples -->
+    <div class="modal-overlay" id="modal-basic">
+        <div class="modal-content modal-lg">
+            <button class="modal-close" onclick="closeModal('modal-basic')">×</button>
+            <div class="inscription-preview">
+                <h3>Genesis Inscription #1</h3>
+                <p style="color: #cbd5e1;">📄 text/plain</p>
+                <div style="background: #0f0f23; padding: 2rem; margin: 1rem 0; border-radius: 8px; font-family: monospace;">
+                    "Hello, World! This is the first Bitcoin inscription."
+                </div>
+                <div class="inscription-controls">
+                    <button class="btn btn-sm">🔍 Zoom In</button>
+                    <button class="btn btn-sm">💾 Download</button>
+                    <button class="btn btn-sm">📋 Copy ID</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-custom">
+        <div class="modal-content modal-xl">
+            <button class="modal-close" onclick="closeModal('modal-custom')">×</button>
+            <div class="inscription-preview">
+                <h3>🎨 Digital Art Inscription #42</h3>
+                <p style="color: #cbd5e1;">🖼️ image/svg+xml</p>
+                <div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4); height: 300px; margin: 1rem 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                    🎨 SVG Artwork
+                </div>
+                <div class="inscription-controls">
+                    <button class="btn btn-sm">🔍 Zoom</button>
+                    <button class="btn btn-sm">🔄 Rotate</button>
+                    <button class="btn btn-sm">💾 Download</button>
+                    <button class="btn btn-sm">🔗 Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-sm">
+        <div class="modal-content modal-sm">
+            <button class="modal-close" onclick="closeModal('modal-sm')">×</button>
+            <div class="inscription-preview">
+                <h3>Small Modal</h3>
+                <p style="color: #cbd5e1;">Perfect for quick previews</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-md">
+        <div class="modal-content modal-md">
+            <button class="modal-close" onclick="closeModal('modal-md')">×</button>
+            <div class="inscription-preview">
+                <h3>Medium Modal</h3>
+                <p style="color: #cbd5e1;">Good balance of size and content</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-lg">
+        <div class="modal-content modal-lg">
+            <button class="modal-close" onclick="closeModal('modal-lg')">×</button>
+            <div class="inscription-preview">
+                <h3>Large Modal</h3>
+                <p style="color: #cbd5e1;">Great for detailed content viewing</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-xl">
+        <div class="modal-content modal-xl">
+            <button class="modal-close" onclick="closeModal('modal-xl')">×</button>
+            <div class="inscription-preview">
+                <h3>Extra Large Modal</h3>
+                <p style="color: #cbd5e1;">Maximum detail and control space</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-full">
+        <div class="modal-content modal-full">
+            <button class="modal-close" onclick="closeModal('modal-full')">×</button>
+            <div class="inscription-preview">
+                <h3>Full Screen Modal</h3>
+                <p style="color: #cbd5e1;">Immersive viewing experience</p>
+                <div style="height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                    🌟 Full Experience
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking overlay
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeModal(overlay.id);
+                }
+            });
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                    if (overlay.style.display === 'flex') {
+                        closeModal(overlay.id);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
