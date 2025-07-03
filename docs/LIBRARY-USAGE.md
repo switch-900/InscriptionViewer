@@ -84,7 +84,7 @@ function WalletInscriptions() {
       enableModal={true}
       onInscriptionClick={(inscription) => {
         console.log('Clicked:', inscription.id);
-      }}
+      {% raw %}}}{% endraw %}
     />
   );
 }
@@ -175,7 +175,7 @@ The component automatically adjusts columns based on screen size:
       id: inscription.id,
       number: inscription.number
     });
-  }}
+  {% raw %}}}{% endraw %}
 />
 ```
 

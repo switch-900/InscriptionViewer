@@ -185,7 +185,7 @@ function WalletInscriptions({ walletAddress }: { walletAddress: string }) {
       enableModal={true}
       onInscriptionClick={(inscription) => {
         console.log('Clicked:', inscription.id);
-      }}
+      {% raw %}}}{% endraw %}
     />
   );
 }
@@ -206,7 +206,7 @@ function SingleInscription({ inscriptionId }: { inscriptionId: string }) {
         showControls={true}
         onAnalysisComplete={(analysis) => {
           console.log('Content type:', analysis.contentInfo.detectedType);
-        }}
+        {% raw %}}}{% endraw %}
       />
     </div>
   );

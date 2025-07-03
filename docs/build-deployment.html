@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build & Deployment Guide - Bitcoin Inscription Viewer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        .toc ul {
+            list-style: none;
+            padding: 0;
+        }
+        .toc li {
+            margin: 0.5rem 0;
+        }
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .code-block {
+            position: relative;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .copy-btn:hover {
+            background: #2d3748;
+        }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem; }
+        h3 { color: #2980b9; }
+        .section {
+            margin: 3rem 0;
+        }
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Build & Deployment Guide</h1>
+        <p>Complete guide for building, packaging, and deploying the Bitcoin Inscription Viewer library</p>
+    </div>
+
+    <div class="toc">
+        <h3>📖 Table of Contents</h3>
+        <ul>
+            <li><a href="#library-build">📦 Library Build</a></li>
+            <li><a href="#application-build">🏗️ Application Build</a></li>
+            <li><a href="#npm-package">📋 NPM Package</a></li>
+            <li><a href="#development-setup">🔧 Development Setup</a></li>
+            <li><a href="#production-deployment">🌐 Production Deployment</a></li>
+            <li><a href="#ci-cd-pipeline">⚙️ CI/CD Pipeline</a></li>
+        </ul>
+    </div>
+
+    <div class="section" id="library-build">
+        <h2>📦 Library Build</h2>
+        
+        <h3>Building the Library Package</h3>
+        <p>The library can be built in multiple formats for different use cases:</p>
+        
+        <div class="code-block">
+            <pre><code># Build the library for npm distribution
+npm run build:lib
+
+# Build the demo application
+npm run build
+
+# Type checking only
+npm run type-check</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+
+        <h3>Build Outputs</h3>
+        <p>The library build creates multiple distribution formats:</p>
+        
+        <div class="code-block">
+            <pre><code>dist/
+├── index.js          # CommonJS build
+├── index.esm.js      # ES Module build
+├── index.d.ts        # TypeScript declarations
+├── style.css         # Bundled styles
+└── assets/           # Static assets</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="application-build">
+        <h2>🏗️ Application Build</h2>
+        
+        <h3>Development Build</h3>
+        <p>For development with hot module replacement:</p>
+        
+        <div class="code-block">
+            <pre><code>npm run dev</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+
+        <p>This starts the Vite development server with:</p>
+        <ul>
+            <li>Hot module replacement (HMR)</li>
+            <li>TypeScript compilation</li>
+            <li>CSS processing with Tailwind</li>
+            <li>Source maps for debugging</li>
+        </ul>
+
+        <h3>Production Build</h3>
+        <p>For optimized production builds:</p>
+        
+        <div class="code-block">
+            <pre><code>npm run build</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+
+        <p>Production build includes:</p>
+        <ul>
+            <li>Code minification and tree-shaking</li>
+            <li>CSS optimization and purging</li>
+            <li>Asset optimization (images, fonts)</li>
+            <li>Bundle analysis and optimization</li>
+            <li>Source map generation</li>
+        </ul>
+    </div>
+
+    <div class="section" id="npm-package">
+        <h2>📋 NPM Package</h2>
+        
+        <h3>Publishing to NPM</h3>
+        <div class="code-block">
+            <pre><code># Build the library
+npm run build:lib
+
+# Test the package locally
+npm pack
+npm install ./bitcoin-inscription-viewer-1.0.0.tgz
+
+# Publish to npm
+npm publish
+
+# Publish with tag
+npm publish --tag beta</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+
+        <h3>Version Management</h3>
+        <div class="code-block">
+            <pre><code># Update version
+npm version patch  # 1.0.0 -> 1.0.1
+npm version minor  # 1.0.0 -> 1.1.0  
+npm version major  # 1.0.0 -> 2.0.0
+
+# Pre-release versions
+npm version prerelease --preid=beta  # 1.0.0 -> 1.0.1-beta.0</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="development-setup">
+        <h2>🔧 Development Setup</h2>
+        
+        <h3>Prerequisites</h3>
+        <ul>
+            <li>Node.js 18+ (recommended: use nvm)</li>
+            <li>npm 9+ or yarn 1.22+ or pnpm 8+</li>
+            <li>Git</li>
+        </ul>
+
+        <h3>Environment Setup</h3>
+        <div class="code-block">
+            <pre><code># Clone the repository
+git clone https://github.com/your-username/inscription-viewer.git
+cd inscription-viewer
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="production-deployment">
+        <h2>🌐 Production Deployment</h2>
+        
+        <h3>GitHub Pages Deployment</h3>
+        <p>The demo application can be deployed to GitHub Pages:</p>
+        
+        <div class="code-block">
+            <pre><code># Build for GitHub Pages
+npm run build
+
+# Deploy to gh-pages branch
+npm run deploy</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+
+        <h3>Vercel Deployment</h3>
+        <div class="code-block">
+            <pre><code># Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="ci-cd-pipeline">
+        <h2>⚙️ CI/CD Pipeline</h2>
+        
+        <h3>GitHub Actions Workflow</h3>
+        <p>Example workflow for automated testing and deployment:</p>
+        
+        <div class="code-block">
+            <pre><code>name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run type check
+      run: npm run type-check
+    
+    - name: Build library
+      run: npm run build:lib
+    
+    - name: Build application
+      run: npm run build</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.previousElementSibling;
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examples Guide - Bitcoin Inscription Viewer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        .toc ul {
+            list-style: none;
+            padding: 0;
+        }
+        .toc li {
+            margin: 0.5rem 0;
+        }
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .code-block {
+            position: relative;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .copy-btn:hover {
+            background: #2d3748;
+        }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem; }
+        h3 { color: #2980b9; }
+        .section {
+            margin: 3rem 0;
+        }
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Examples Guide</h1>
+        <p>Comprehensive collection of examples for using the Bitcoin Inscription Viewer library</p>
+    </div>
+
+    <div class="toc">
+        <h3>📖 Table of Contents</h3>
+        <ul>
+            <li><a href="#basic-usage">🚀 Basic Usage</a></li>
+            <li><a href="#responsive-layouts">📱 Responsive Layouts</a></li>
+            <li><a href="#wallet-integration">💰 Wallet Integration</a></li>
+            <li><a href="#custom-endpoints">🌐 Custom API Endpoints</a></li>
+            <li><a href="#content-types">🎨 Content Type Handling</a></li>
+            <li><a href="#performance">⚡ Performance Optimization</a></li>
+        </ul>
+    </div>
+
+    <div class="section" id="basic-usage">
+        <h2>🚀 Basic Usage</h2>
+        
+        <h3>Simple Gallery</h3>
+        <div class="code-block">
+            <pre><code>import { InscriptionViewer } from 'bitcoin-inscription-viewer';
+
+function SimpleGallery() {
+  const inscriptions = [
+    '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0',
+    'e317a2a5d68bd1004ae15a06175a319272a10389ff125c98820389edef8b0a94i0',
+    'b1ef66c2d1a047cbaa6260b74daac43813924378fe08ef8545da4cb79e8fcf00i0'
+  ];
+
+  return (
+    &lt;div className="container mx-auto p-4"&gt;
+      &lt;h1 className="text-2xl font-bold mb-4"&gt;My Inscription Gallery&lt;/h1&gt;
+      &lt;InscriptionViewer
+        inscriptions={inscriptions}
+        cardSize={300}
+        gridCols={3}
+        showHeaders={true}
+        showControls={true}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+
+        <h3>Minimal Setup</h3>
+        <div class="code-block">
+            <pre><code>import { InscriptionViewer } from 'bitcoin-inscription-viewer';
+
+function MinimalGallery() {
+  return (
+    &lt;InscriptionViewer
+      inscriptions={['6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0']}
+    /&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="responsive-layouts">
+        <h2>📱 Responsive Layouts</h2>
+        
+        <h3>Mobile-First Grid</h3>
+        <div class="code-block">
+            <pre><code>import { InscriptionViewer } from 'bitcoin-inscription-viewer';
+
+function ResponsiveGallery() {
+  const inscriptions = [
+    '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0',
+    'e317a2a5d68bd1004ae15a06175a319272a10389ff125c98820389edef8b0a94i0',
+    'b1ef66c2d1a047cbaa6260b74daac43813924378fe08ef8545da4cb79e8fcf00i0'
+  ];
+
+  return (
+    &lt;div className="container mx-auto p-4"&gt;
+      {/* Mobile: 1 col, Tablet: 2 cols, Desktop: 3 cols, Large: 4 cols */}
+      &lt;div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"&gt;
+        {inscriptions.map((id, index) =&gt; (
+          &lt;div key={id} className="aspect-square border rounded-lg overflow-hidden"&gt;
+            &lt;InscriptionRenderer
+              inscriptionId={id}
+              inscriptionNumber={index + 1}
+              className="w-full h-full"
+              showHeader={true}
+              showControls={true}
+            /&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="wallet-integration">
+        <h2>💰 Wallet Integration</h2>
+        
+        <h3>LaserEyes Wallet Gallery</h3>
+        <div class="code-block">
+            <pre><code>import { LaserEyesInscriptionGallery } from 'bitcoin-inscription-viewer';
+import { LaserEyesProvider } from '@omnisat/lasereyes';
+
+function WalletIntegratedApp() {
+  return (
+    &lt;LaserEyesProvider&gt;
+      &lt;div className="min-h-screen bg-gray-50 p-4"&gt;
+        &lt;div className="container mx-auto"&gt;
+          &lt;h1 className="text-2xl font-bold mb-6"&gt;My Wallet Inscriptions&lt;/h1&gt;
+          &lt;LaserEyesInscriptionGallery
+            columns={3}
+            cardSize={250}
+            showIndex={true}
+            enableModal={true}
+            autoLoad={true}
+          /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/LaserEyesProvider&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="custom-endpoints">
+        <h2>🌐 Custom API Endpoints</h2>
+        
+        <h3>Using Recursive Endpoints</h3>
+        <div class="code-block">
+            <pre><code>import { InscriptionViewer } from 'bitcoin-inscription-viewer';
+
+function RecursiveEndpointExample() {
+  return (
+    &lt;InscriptionViewer
+      inscriptions={['6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0']}
+      apiEndpoint="https://ordinals.com" // Automatically uses /r/ endpoints
+      cardSize={300}
+      showHeaders={true}
+    /&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+
+        <h3>Custom Server Configuration</h3>
+        <div class="code-block">
+            <pre><code>import { InscriptionViewer } from 'bitcoin-inscription-viewer';
+
+function CustomServerExample() {
+  return (
+    &lt;InscriptionViewer
+      inscriptions={['6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0']}
+      apiEndpoint="https://your-ordinals-server.com"
+      cardSize={300}
+      showHeaders={true}
+      fallbackEndpoint="https://ordinals.com" // Fallback if custom server fails
+    /&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="content-types">
+        <h2>🎨 Content Type Handling</h2>
+        
+        <h3>Image-Specific Configuration</h3>
+        <div class="code-block">
+            <pre><code>import { InscriptionRenderer } from 'bitcoin-inscription-viewer';
+
+function ImageGallery() {
+  const imageInscriptions = [
+    '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0', // Image inscription
+    'e317a2a5d68bd1004ae15a06175a319272a10389ff125c98820389edef8b0a94i0'  // Another image
+  ];
+
+  return (
+    &lt;div className="grid grid-cols-2 gap-4 p-4"&gt;
+      {imageInscriptions.map((id, index) =&gt; (
+        &lt;div key={id} className="aspect-square border rounded-lg overflow-hidden"&gt;
+          &lt;InscriptionRenderer
+            inscriptionId={id}
+            className="w-full h-full"
+            showHeader={true}
+            showControls={true}
+            contentType="image" // Hint for content type
+          /&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="section" id="performance">
+        <h2>⚡ Performance Optimization</h2>
+        
+        <h3>Lazy Loading Gallery</h3>
+        <div class="code-block">
+            <pre><code>import { InscriptionViewer } from 'bitcoin-inscription-viewer';
+
+function LazyLoadingGallery() {
+  const manyInscriptions = Array.from({ length: 100 }, (_, i) =&gt; 
+    `inscription-id-${i}`
+  );
+
+  return (
+    &lt;div className="container mx-auto p-4"&gt;
+      &lt;h1 className="text-2xl font-bold mb-4"&gt;Large Gallery (Lazy Loaded)&lt;/h1&gt;
+      &lt;InscriptionViewer
+        inscriptions={manyInscriptions}
+        cardSize={250}
+        gridCols={4}
+        lazy={true} // Enable lazy loading
+        showHeaders={false} // Reduce initial rendering
+        autoLoad={false} // Load on demand
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+
+    <div class="highlight">
+        <p><strong>💡 Pro Tip:</strong> All examples are responsive by default. The inscription viewer automatically adapts to any container size while maintaining aspect ratio and ensuring perfect centering!</p>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.previousElementSibling;
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

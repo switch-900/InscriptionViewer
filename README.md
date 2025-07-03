@@ -90,7 +90,7 @@ import { InscriptionRenderer } from 'bitcoin-inscription-viewer';
 
 function SingleInscription() {
   return (
-    <div style={{ width: '400px', height: '400px' }}>
+    <div style={{% raw %}{{ width: '400px', height: '400px' }}{% endraw %}}>
       <InscriptionRenderer
         inscriptionId="6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0"
         size={400}

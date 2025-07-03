@@ -121,7 +121,7 @@ const WalletInscriptions = ({ userAddress }) => {
         onInscriptionClick={(inscription) => {
           // Handle custom actions (analytics, navigation, etc.)
           console.log('Viewed inscription:', inscription.id);
-        }}
+        {% raw %}}}{% endraw %}
       />
     </div>
   );
