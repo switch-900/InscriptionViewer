@@ -16,6 +16,8 @@ export interface InscriptionViewerProps {
   lazy?: boolean;
   enableModal?: boolean;
   apiEndpoint?: string;
+  htmlRenderMode?: 'iframe' | 'sandbox';
+  forceIframe?: boolean;
   className?: string;
 }
 

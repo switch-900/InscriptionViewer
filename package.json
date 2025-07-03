@@ -94,7 +94,7 @@
     "vite-plugin-singlefile": "^2.2.0"
   },
   "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }

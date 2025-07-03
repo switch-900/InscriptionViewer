@@ -18,6 +18,8 @@ interface InscriptionModalProps {
   triggerClassName?: string;
   modalSize?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   showTriggerButton?: boolean;
+  htmlRenderMode?: 'iframe' | 'sandbox';
+  forceIframe?: boolean;
 }
 
 const modalSizes = {
@@ -36,7 +38,9 @@ export function InscriptionModal({
   trigger,
   triggerClassName = '',
   modalSize = 'lg',
-  showTriggerButton = true
+  showTriggerButton = true,
+  htmlRenderMode = 'sandbox',
+  forceIframe = false
 }: InscriptionModalProps) {
   const [open, setOpen] = React.useState(false);
   const [analysis, setAnalysis] = React.useState<ContentAnalysis | null>(null);
@@ -103,6 +107,8 @@ export function InscriptionModal({
               showHeader={false} // Header already shown in modal
               showControls={true}
               autoLoad={true}
+              htmlRenderMode={htmlRenderMode}
+              forceIframe={forceIframe}
               onAnalysisComplete={handleAnalysisComplete}
             />
           </div>

@@ -28,6 +28,8 @@ interface InscriptionRendererProps {
   showControls?: boolean;
   autoLoad?: boolean;
   apiEndpoint?: string; // Custom API endpoint
+  htmlRenderMode?: 'iframe' | 'sandbox';
+  forceIframe?: boolean;
   onAnalysisComplete?: (analysis: ContentAnalysis) => void;
 }
 
@@ -49,6 +51,8 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   showControls = true,
   autoLoad = true,
   apiEndpoint,
+  htmlRenderMode = 'sandbox',
+  forceIframe = false,
   onAnalysisComplete
 }: InscriptionRendererProps) {
   const [loadedContent, setLoadedContent] = useState<LoadedContent | null>(null);
@@ -402,6 +406,18 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
         );
 
       case 'html':
+        // Check if forceIframe is set or if htmlRenderMode is iframe
+        if (forceIframe || htmlRenderMode === 'iframe') {
+          return (
+            <IframeRenderer
+              src={loadedContent.url}
+              mimeType={contentInfo.mimeType}
+              maxHeight={maxHeight}
+              showControls={showControls}
+            />
+          );
+        }
+        
         return (
           <HtmlRenderer
             content={loadedContent.text || ''}

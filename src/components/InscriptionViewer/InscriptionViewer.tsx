@@ -16,6 +16,8 @@ export const InscriptionViewer = React.memo(function InscriptionViewer({
   lazy = false,
   enableModal = false,
   apiEndpoint,
+  htmlRenderMode = 'sandbox',
+  forceIframe = false,
   className = ''
 }: InscriptionViewerProps) {
   // Normalize the input to consistent format
@@ -41,7 +43,9 @@ export const InscriptionViewer = React.memo(function InscriptionViewer({
       showHeader: showHeaders,
       showControls: showControls,
       autoLoad: autoLoad,
-      apiEndpoint: apiEndpoint
+      apiEndpoint: apiEndpoint,
+      htmlRenderMode: htmlRenderMode,
+      forceIframe: forceIframe
     };
 
     if (enableModal) {

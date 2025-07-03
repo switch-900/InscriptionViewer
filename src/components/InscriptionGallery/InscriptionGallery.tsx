@@ -4,6 +4,7 @@ import { InscriptionModal } from '../InscriptionViewer/InscriptionModal';
 import { InscriptionRenderer } from '../InscriptionViewer/InscriptionRenderer';
 import { Button } from '../ui/button';
 import { InscriptionData } from '../../types';
+import { ContentAnalysis } from '../InscriptionViewer/contentAnalyzer';
 
 export interface InscriptionGalleryProps {
   /** Array of inscription IDs to display */
@@ -18,6 +19,12 @@ export interface InscriptionGalleryProps {
   showIndex?: boolean;
   /** Enable modal view on click */
   enableModal?: boolean;
+  /** Show content-specific controls */
+  showControls?: boolean;
+  /** HTML render mode for HTML content */
+  htmlRenderMode?: 'iframe' | 'sandbox';
+  /** Force iframe rendering for all content */
+  forceIframe?: boolean;
   /** Custom loading component */
   loadingComponent?: React.ReactNode;
   /** Custom error component */
@@ -28,7 +35,7 @@ export interface InscriptionGalleryProps {
   className?: string;
 }
 
-const columnClasses = {
+const columnClasses: Record<number, string> = {
   1: 'grid-cols-1',
   2: 'grid-cols-1 md:grid-cols-2',
   3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
@@ -44,6 +51,9 @@ export const InscriptionGallery: React.FC<InscriptionGalleryProps> = ({
   cardSize = 200,
   showIndex = false,
   enableModal = false,
+  showControls = true,
+  htmlRenderMode = 'sandbox',
+  forceIframe = false,
   loadingComponent,
   errorComponent,
   onInscriptionClick,
@@ -75,6 +85,9 @@ export const InscriptionGallery: React.FC<InscriptionGalleryProps> = ({
           gridCols={columns}
           enableModal={true}
           showHeaders={showIndex}
+          showControls={showControls}
+          htmlRenderMode={htmlRenderMode}
+          forceIframe={forceIframe}
           apiEndpoint={apiEndpoint}
           className="inscription-gallery"
         />
@@ -85,12 +98,15 @@ export const InscriptionGallery: React.FC<InscriptionGalleryProps> = ({
   // Otherwise, render custom card layout
   return (
     <div className={`grid gap-4 ${columnClasses[columns]} ${className}`} style={{ width: '100%' }}>
-      {inscriptionIds.map((inscriptionId, index) => (
+      {inscriptionIds.map((inscriptionId: string, index: number) => (
         <div key={inscriptionId} className="flex justify-center">
           <InscriptionCard
             inscriptionId={inscriptionId}
             index={showIndex ? index + 1 : undefined}
             size={cardSize}
+            showControls={showControls}
+            htmlRenderMode={htmlRenderMode}
+            forceIframe={forceIframe}
             apiEndpoint={apiEndpoint}
             onInscriptionClick={onInscriptionClick}
           />
@@ -104,6 +120,9 @@ interface InscriptionCardProps {
   inscriptionId: string;
   index?: number;
   size: number;
+  showControls?: boolean;
+  htmlRenderMode?: 'iframe' | 'sandbox';
+  forceIframe?: boolean;
   apiEndpoint?: string;
   onInscriptionClick?: (inscription: InscriptionData) => void;
 }
@@ -112,6 +131,9 @@ const InscriptionCard: React.FC<InscriptionCardProps> = ({
   inscriptionId,
   index,
   size,
+  showControls = false,
+  htmlRenderMode = 'sandbox',
+  forceIframe = false,
   apiEndpoint,
   onInscriptionClick
 }) => {
@@ -156,12 +178,14 @@ const InscriptionCard: React.FC<InscriptionCardProps> = ({
           <InscriptionRenderer
             inscriptionId={inscriptionId}
             size={size - 8} // Account for padding
-            showControls={false}
+            showControls={showControls}
             showHeader={false}
             autoLoad={true}
             apiEndpoint={apiEndpoint}
+            htmlRenderMode={htmlRenderMode}
+            forceIframe={forceIframe}
             className="w-full h-full"
-            onAnalysisComplete={(analysis) => {
+            onAnalysisComplete={(analysis: ContentAnalysis) => {
               console.log('Analysis complete for card:', inscriptionId, analysis);
               setIsLoading(false);
               if (analysis.error) {

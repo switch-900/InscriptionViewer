@@ -3,7 +3,16 @@ import { InscriptionRenderer } from './InscriptionRenderer';
 
 interface LazyInscriptionCardProps {
   inscriptionId: string;
+  inscriptionNumber?: number | string;
   contentUrl?: string;
+  contentType?: string;
+  size?: number;
+  showHeader?: boolean;
+  showControls?: boolean;
+  autoLoad?: boolean;
+  apiEndpoint?: string;
+  htmlRenderMode?: 'iframe' | 'sandbox';
+  forceIframe?: boolean;
   className?: string;
   onLoad?: () => void;
   onError?: (error: string) => void;
@@ -12,7 +21,16 @@ interface LazyInscriptionCardProps {
 
 export function LazyInscriptionCard({
   inscriptionId,
+  inscriptionNumber,
   contentUrl,
+  contentType,
+  size = 300,
+  showHeader = true,
+  showControls = true,
+  autoLoad = true,
+  apiEndpoint,
+  htmlRenderMode = 'sandbox',
+  forceIframe = false,
   className = '',
   onLoad,
   onError,
@@ -61,7 +79,17 @@ export function LazyInscriptionCard({
       {isVisible ? (
         <InscriptionRenderer
           inscriptionId={inscriptionId}
+          inscriptionNumber={inscriptionNumber}
           contentUrl={contentUrl}
+          contentType={contentType}
+          size={size}
+          showHeader={showHeader}
+          showControls={showControls}
+          autoLoad={autoLoad}
+          apiEndpoint={apiEndpoint}
+          htmlRenderMode={htmlRenderMode}
+          forceIframe={forceIframe}
+          className="w-full h-full"
         />
       ) : (
         <div className="flex items-center justify-center h-48 bg-gray-100 rounded-lg">
