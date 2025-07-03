@@ -8,16 +8,17 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #e2e8f0;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            background: #0f0f23;
         }
         .header {
             text-align: center;
             margin-bottom: 3rem;
             padding: 3rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #4c1d95 100%);
             color: white;
             border-radius: 15px;
         }
@@ -38,29 +39,30 @@
             margin: 3rem 0;
         }
         .doc-card {
-            background: white;
-            border: 1px solid #e1e4e8;
+            background: linear-gradient(135deg, #262447 0%, #3730a3 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
             border-radius: 12px;
             padding: 2rem;
             text-decoration: none;
-            color: inherit;
+            color: #e2e8f0;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
         }
         .doc-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
             text-decoration: none;
-            color: inherit;
+            color: #e2e8f0;
+            border-color: #8b5cf6;
         }
         .doc-card h3 {
             margin: 0 0 1rem 0;
-            color: #2c3e50;
+            color: #8b5cf6;
             font-size: 1.5rem;
         }
         .doc-card p {
             margin: 0;
-            color: #666;
+            color: #cbd5e1;
             line-height: 1.6;
         }
         .doc-card .icon {
@@ -69,14 +71,15 @@
             display: block;
         }
         .quick-links {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #1e1e3f 0%, #3730a3 100%);
             border-radius: 12px;
             padding: 2rem;
             margin: 3rem 0;
+            border: 1px solid rgba(139, 92, 246, 0.2);
         }
         .quick-links h2 {
             margin-top: 0;
-            color: #2c3e50;
+            color: #8b5cf6;
         }
         .link-grid {
             display: grid;
@@ -85,20 +88,22 @@
             margin-top: 1.5rem;
         }
         .quick-link {
-            background: white;
-            border: 1px solid #dee2e6;
+            background: linear-gradient(135deg, #262447 0%, #3730a3 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
             border-radius: 8px;
             padding: 1rem;
             text-decoration: none;
-            color: #0066cc;
+            color: #8b5cf6;
             font-weight: 500;
             text-align: center;
             transition: all 0.2s ease;
         }
         .quick-link:hover {
-            background: #0066cc;
+            background: linear-gradient(135deg, #4c1d95 0%, #6366f1 100%);
             color: white;
             text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
         }
         .badges {
             display: flex;
@@ -146,25 +151,25 @@
             <p>Framework integration patterns, layout components, state management, and performance optimization techniques for various use cases.</p>
         </a>
 
-        <a href="./docs/EXAMPLES.html" class="doc-card">
+        <a href="./examples.html" class="doc-card">
             <span class="icon">📚</span>
             <h3>Examples</h3>
             <p>Comprehensive collection of code examples showing different usage patterns, from basic galleries to advanced interactive features.</p>
         </a>
 
-        <a href="./docs/API.html" class="doc-card">
+        <a href="../README.html" class="doc-card">
             <span class="icon">📖</span>
             <h3>API Reference</h3>
             <p>Complete API documentation with all component props, hooks, utilities, and configuration options.</p>
         </a>
 
-        <a href="./docs/BUILD-DEPLOYMENT.html" class="doc-card">
+        <a href="./build-deployment.html" class="doc-card">
             <span class="icon">🚀</span>
             <h3>Build & Deployment</h3>
             <p>Guide for building, testing, and deploying applications that use the Bitcoin Inscription Viewer library.</p>
         </a>
 
-        <a href="./api-examples.html" class="doc-card">
+        <a href="../api-examples.html" class="doc-card">
             <span class="icon">🧪</span>
             <h3>Live Demo</h3>
             <p>Interactive demo showcasing all library features with real Bitcoin inscriptions. Try different configurations and see live examples.</p>
@@ -176,23 +181,23 @@
         <div class="link-grid">
             <a href="https://www.npmjs.com/package/bitcoin-inscription-viewer" class="quick-link">📦 NPM Package</a>
             <a href="https://github.com/switch-900/InscriptionViewer" class="quick-link">🐙 GitHub Repository</a>
-            <a href="./CHANGELOG.html" class="quick-link">📝 Changelog</a>
-            <a href="./NPM_PUBLISHING_GUIDE.html" class="quick-link">📋 Publishing Guide</a>
-            <a href="./PROJECT-OVERVIEW.html" class="quick-link">📊 Project Overview</a>
-            <a href="./AI-USAGE-GUIDE.html" class="quick-link">🤖 AI Usage Guide</a>
+            <a href="../CHANGELOG.md" class="quick-link">📝 Changelog</a>
+            <a href="https://github.com/switch-900/InscriptionViewer#readme" class="quick-link">📋 README</a>
+            <a href="https://github.com/switch-900/InscriptionViewer" class="quick-link">📊 Project Overview</a>
+            <a href="https://github.com/switch-900/InscriptionViewer/issues" class="quick-link">🤖 Issues & Support</a>
         </div>
     </div>
 
-    <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: #f8f9fa; border-radius: 12px;">
-        <h3>🎯 Getting Started</h3>
-        <p style="margin-bottom: 1.5rem;">Install the library and start building your Bitcoin inscription viewer:</p>
-        <code style="background: #e9ecef; padding: 0.5rem 1rem; border-radius: 4px; font-family: monospace;">
+    <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: linear-gradient(135deg, #1e1e3f 0%, #3730a3 100%); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.2);">
+        <h3 style="color: #8b5cf6;">🎯 Getting Started</h3>
+        <p style="margin-bottom: 1.5rem; color: #cbd5e1;">Install the library and start building your Bitcoin inscription viewer:</p>
+        <code style="background: #0f0f23; padding: 0.5rem 1rem; border-radius: 4px; font-family: monospace; color: #e2e8f0; border: 1px solid rgba(139, 92, 246, 0.3);">
             npm install bitcoin-inscription-viewer
         </code>
     </div>
 
-    <footer style="text-align: center; margin-top: 3rem; padding: 2rem; border-top: 1px solid #e1e4e8; color: #666;">
-        <p>Built with ❤️ for the Bitcoin ecosystem • <a href="https://github.com/switch-900/InscriptionViewer" style="color: #0066cc;">Contribute on GitHub</a></p>
+    <footer style="text-align: center; margin-top: 3rem; padding: 2rem; border-top: 1px solid rgba(139, 92, 246, 0.2); color: #cbd5e1;">
+        <p>Built with ❤️ for the Bitcoin ecosystem • <a href="https://github.com/switch-900/InscriptionViewer" style="color: #8b5cf6;">Contribute on GitHub</a></p>
     </footer>
 </body>
 </html>

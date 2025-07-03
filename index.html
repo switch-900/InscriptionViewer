@@ -8,12 +8,13 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #e2e8f0;
             margin: 0;
             padding: 0;
+            background: #0f0f23;
         }
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #4c1d95 100%);
             color: white;
             text-align: center;
             padding: 4rem 2rem;
@@ -46,21 +47,23 @@
             transition: all 0.3s ease;
         }
         .btn-primary {
-            background: white;
-            color: #667eea;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
         }
         .btn-secondary {
-            background: rgba(255,255,255,0.2);
+            background: rgba(139, 92, 246, 0.2);
             color: white;
-            border: 2px solid white;
+            border: 2px solid #8b5cf6;
         }
         .btn-secondary:hover {
-            background: white;
-            color: #667eea;
+            background: #8b5cf6;
+            color: white;
         }
         .container {
             max-width: 1200px;
@@ -69,7 +72,7 @@
         }
         .features {
             padding: 4rem 0;
-            background: #f8f9fa;
+            background: #1e1e3f;
         }
         .features-grid {
             display: grid;
@@ -78,11 +81,13 @@
             margin-top: 2rem;
         }
         .feature-card {
-            background: white;
+            background: linear-gradient(135deg, #262447 0%, #3730a3 100%);
             padding: 2rem;
             border-radius: 12px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: #e2e8f0;
         }
         .feature-icon {
             font-size: 3rem;
@@ -90,10 +95,11 @@
         }
         .quick-start {
             padding: 4rem 0;
+            background: #0f0f23;
         }
         .code-block {
-            background: #f6f8fa;
-            border: 1px solid #e1e4e8;
+            background: #1e1e3f;
+            border: 1px solid #4c1d95;
             border-radius: 8px;
             padding: 1.5rem;
             margin: 1rem 0;
@@ -102,14 +108,16 @@
         .code-block pre {
             margin: 0;
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            color: #e2e8f0;
         }
         .nav {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #0f0f23 0%, #1e1e3f 100%);
+            box-shadow: 0 2px 20px rgba(139, 92, 246, 0.2);
             padding: 1rem 0;
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(10px);
         }
         .nav-content {
             display: flex;
@@ -122,17 +130,18 @@
             align-items: center;
         }
         .nav-links a {
-            color: #333;
+            color: #e2e8f0;
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.3s ease;
         }
         .nav-links a:hover {
-            color: #667eea;
+            color: #8b5cf6;
         }
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #667eea;
+            color: #8b5cf6;
         }
     </style>
 </head>
@@ -143,7 +152,7 @@
                 <div class="logo">🚀 Bitcoin Inscription Viewer</div>
                 <div class="nav-links">
                     <a href="./docs/index.html">Documentation</a>
-                    <a href="./LASEREYES-INTEGRATION.html">LaserEyes</a>
+                    <a href="./docs/LASEREYES-INTEGRATION.html">LaserEyes</a>
                     <a href="./api-examples.html">Demo</a>
                     <a href="https://github.com/switch-900/InscriptionViewer">GitHub</a>
                 </div>
@@ -163,7 +172,7 @@
 
     <div class="features">
         <div class="container">
-            <h2 style="text-align: center; margin-bottom: 2rem;">✨ Features</h2>
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #e2e8f0;">✨ Features</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">🎨</div>
@@ -201,14 +210,14 @@
 
     <div class="quick-start">
         <div class="container">
-            <h2 style="text-align: center; margin-bottom: 2rem;">🚀 Quick Start</h2>
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #e2e8f0;">🚀 Quick Start</h2>
             
-            <h3>1. Install</h3>
+            <h3 style="color: #8b5cf6;">1. Install</h3>
             <div class="code-block">
                 <pre>npm install bitcoin-inscription-viewer</pre>
             </div>
 
-            <h3>2. Basic Usage</h3>
+            <h3 style="color: #8b5cf6;">2. Basic Usage</h3>
             <div class="code-block">
                 <pre>import { InscriptionViewer } from 'bitcoin-inscription-viewer'
 
@@ -228,7 +237,7 @@ function App() {
 }</pre>
             </div>
 
-            <h3>3. With LaserEyes Wallet</h3>
+            <h3 style="color: #8b5cf6;">3. With LaserEyes Wallet</h3>
             <div class="code-block">
                 <pre>import { LaserEyesProvider } from '@omnisat/lasereyes-react'
 import { LaserEyesInscriptionGallery } from 'bitcoin-inscription-viewer'
@@ -252,13 +261,13 @@ function App() {
         </div>
     </div>
 
-    <footer style="background: #2c3e50; color: white; text-align: center; padding: 2rem;">
+    <footer style="background: linear-gradient(135deg, #1e1e3f 0%, #0f0f23 100%); color: #e2e8f0; text-align: center; padding: 2rem; border-top: 1px solid rgba(139, 92, 246, 0.2);">
         <div class="container">
             <p>Built with ❤️ for the Bitcoin ecosystem</p>
             <p>
-                <a href="https://github.com/switch-900/InscriptionViewer" style="color: #74b9ff;">GitHub</a> • 
-                <a href="https://www.npmjs.com/package/bitcoin-inscription-viewer" style="color: #74b9ff;">NPM</a> • 
-                <a href="./docs/index.html" style="color: #74b9ff;">Documentation</a>
+                <a href="https://github.com/switch-900/InscriptionViewer" style="color: #8b5cf6;">GitHub</a> • 
+                <a href="https://www.npmjs.com/package/bitcoin-inscription-viewer" style="color: #8b5cf6;">NPM</a> • 
+                <a href="./docs/index.html" style="color: #8b5cf6;">Documentation</a>
             </p>
         </div>
     </footer>
