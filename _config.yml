@@ -18,12 +18,14 @@ plugins:
 include:
   - README.md
   - docs/
+  - "*.html"
 
 exclude:
   - node_modules/
   - dist/
   - src/
   - tests/
+  - examples/
   - "*.json"
   - "*.js"
   - "*.ts"
@@ -32,6 +34,9 @@ exclude:
   - ".eslintrc*"
   - ".prettierrc"
   - "*.config.*"
+  - "*.lock"
+  - ".github/"
+  - ".vscode/"
 
 # Collections
 collections:
