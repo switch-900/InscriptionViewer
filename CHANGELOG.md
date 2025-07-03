@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-01-20
+
+### Added
+- Enhanced React 18 compatibility with optimized ref handling
+- Improved TypeScript strict mode compatibility
+- React 18/19 dual compatibility for maximum ecosystem support
+
+### Fixed
+- Resolved circular dependency between ApiExplorer and InscriptionViewer components
+- Fixed React ref type compatibility issues for React 18
+- Improved build performance and eliminated rollup warnings
+
+### Changed
+- Updated development dependencies to use React 18 for optimal compatibility testing
+- Enhanced type definitions for better React 18/19 compatibility
+- Optimized virtual scrolling ref handling
+
+## [2.3.0] - 2024-01-21
+
+### Changed
+- Optimized for React 18 compatibility while maintaining React 19 support
+- Updated development dependencies to use React 18.2.0 for better compatibility testing
+- Fixed TypeScript ref compatibility issues in virtual scrolling hook
+- Enhanced type safety for cross-React version compatibility
+
+### Fixed
+- Resolved `RefObject<HTMLDivElement | null>` type compatibility issues with React 18
+- Fixed TypeScript compilation warnings in advanced optimization examples
+
+## [2.2.0] - 2024-01-20
+
+### Added
+- React 19 compatibility alongside existing React 18 support
+- Peer dependencies support for both React 18 and 19
+
+## [2.0.0] - 2024-01-20log
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.3.0] - 2024-01-20
+
+### Changed
+- Updated development dependencies to use React 18.2.0 for optimal React 18 compatibility
+- Improved TypeScript types for React 18.2.0
+- Enhanced peer dependency support for both React 18 and React 19
+- Optimized build configuration for React 18 compatibility
+
+### Fixed
+- Ensured all React hooks and patterns are fully compatible with React 18
+- Verified service worker integration works correctly with React 18
+- Confirmed virtual scrolling and optimization features work with React 18
+
+## [2.2.0] - 2024-01-20
+
+### Added
+- React 19 compatibility while maintaining React 18 support
+- Enhanced peer dependency management
+
+## [2.1.0] - 2024-01-20
+
+### Added
+- Static HTML test pages for demonstrations
+- Complete showcase demos and examples
+
 ## [2.0.0] - 2024-01-20
 
 ### Added

@@ -260,7 +260,7 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
     if (virtualScrollConfig.enabled) {
       return (
         <div
-          ref={containerRef}
+          ref={containerRef as React.RefObject<HTMLDivElement>}
           className="overflow-auto border rounded-lg"
           style={{ height: virtualScrollConfig.containerHeight }}
           onScroll={onScroll}

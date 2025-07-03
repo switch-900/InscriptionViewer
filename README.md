@@ -2,6 +2,8 @@
 
 A React/TypeScript library for displaying Bitcoin Ordinals inscriptions with responsive design and comprehensive content support.
 
+**🔧 Compatibility:** React 18 & React 19 | TypeScript 5+ | Modern Browsers
+
 ## 🚀 Quick Start
 
 ```bash

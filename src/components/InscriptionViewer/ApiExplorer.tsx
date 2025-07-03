@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { InscriptionViewer } from '../InscriptionViewer';
+import { InscriptionViewer } from './InscriptionViewer';
 import { useInscriptions, useInscription, useBlock } from '../../hooks';
 
 export interface ApiExplorerProps {
