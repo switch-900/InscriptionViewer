@@ -41,6 +41,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Health check utilities
 - Build optimization for production use
 
+## [1.2.0] - 2025-07-03
+
+### 🚀 Major Performance Optimization Release
+
+#### Added
+- **EnhancedInscriptionViewer**: New component with advanced optimization features
+- **LRU Caching System**: Intelligent memory management with TTL support
+  - `useInscriptionCache` hook with configurable cache policies
+  - Automatic cache eviction and memory optimization
+  - Cache statistics and hit rate monitoring
+- **LaserEyes Wallet Integration**: Direct Bitcoin node content fetching
+  - `LaserEyesService` for wallet-based content retrieval
+  - Enhanced `InscriptionRenderer` with wallet support
+  - Fallback mechanism between wallet and API sources
+- **Virtual Scrolling**: `useVirtualScroll` hook for large datasets
+- **Batch Fetching**: Efficient concurrent request management
+  - `useBatchFetcher` utility with priority queuing
+  - `createBatchFetchRequests` helper function
+  - Configurable batch sizes and concurrency limits
+- **Service Worker Caching**: Long-term offline storage
+  - `ServiceWorkerManager` for cache management
+  - `inscription-sw.js` service worker implementation
+  - Background cache updates and invalidation
+- **Performance Monitoring**: Real-time metrics and analytics
+  - `usePerformanceMonitor` hook for load time tracking
+  - Error rate and bandwidth usage monitoring
+  - Performance export utilities
+- **Enhanced UI Components**: Production-ready components
+  - `Card`, `Badge`, `Button` components with consistent styling
+  - Modal improvements and responsive design enhancements
+
+#### Enhanced
+- **Type Safety**: Improved TypeScript definitions and exports
+- **Error Handling**: Enhanced fallback mechanisms and retry logic
+- **Documentation**: Comprehensive optimization guides and examples
+- **Examples**: New optimization demonstration files
+  - `enhanced-optimization.tsx`: Basic optimization features
+  - `advanced-optimization.tsx`: Complete optimization showcase
+
+#### Technical Improvements
+- Pre-fetched content support for zero-latency rendering
+- Configurable performance options and fallback strategies
+- Intelligent content source prioritization
+- Memory usage optimization and garbage collection
+- Network request deduplication and batching
+
+#### Developer Experience
+- All new features properly exported from main entry points
+- Consistent API design across optimization features
+- Comprehensive TypeScript support
+- Production-ready with extensive testing
+
 ## [Unreleased]
 
 ### Planned

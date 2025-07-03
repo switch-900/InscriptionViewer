@@ -29,6 +29,16 @@ The **Bitcoin Inscription Viewer** is a robust, production-ready React/TypeScrip
 - **JSON Data** - Formatted display with search and collapse features
 - **HTML Content** - Secure iframe rendering with sandboxing
 
+### ⚡ **Advanced Optimization Features** (NEW)
+- **Enhanced Caching System** - LRU cache with TTL and memory management
+- **LaserEyes Wallet Integration** - Direct wallet-based content fetching
+- **Performance Monitoring** - Real-time metrics and analytics
+- **Batch Fetching** - Efficient concurrent content loading
+- **Virtual Scrolling** - Handle thousands of inscriptions smoothly
+- **Service Worker Caching** - Offline support and background caching
+- **Custom Content Fetchers** - Pluggable fetch strategies
+- **Pre-fetched Content Support** - Handle already-loaded data efficiently
+
 ### 🚀 **Developer Experience**
 - **TypeScript First** - Complete type safety and IntelliSense support
 - **Multiple Integration Options** - Gallery, individual viewer, wallet integration
@@ -61,6 +71,18 @@ The **Bitcoin Inscription Viewer** is a robust, production-ready React/TypeScrip
 │   ├── Caching Service (Performance optimization)
 │   ├── URL Builders (API endpoint construction)
 │   └── Responsive Utilities (Breakpoint management)
+│
+├── 🚀 Optimization Components (NEW)
+│   ├── EnhancedInscriptionViewer (Optimized gallery with caching)
+│   ├── LaserEyesService (Wallet-based content fetching)
+│   ├── ServiceWorkerManager (Offline caching management)
+│   └── PerformanceMonitor (Real-time metrics tracking)
+│
+├── 🔗 Advanced Hooks (NEW)
+│   ├── useInscriptionCache (LRU caching with TTL)
+│   ├── usePerformanceMonitor (Load time & error tracking)
+│   ├── useVirtualScroll (Large list optimization)
+│   └── useBatchFetcher (Concurrent loading)
 │
 └── 🎯 Specialized Components
     ├── InscriptionGallery (Pre-configured gallery)
@@ -116,7 +138,15 @@ bitcoin-inscription-viewer/
 │   │   │   └── ...                # Other specialized components
 │   │   ├── services/         # API and data services
 │   │   ├── types/           # TypeScript type definitions
+│   │   ├── hooks/           # React hooks
+│   │   │   ├── useInscriptionCache.ts    # LRU caching hook
+│   │   │   ├── usePerformanceMonitor.ts  # Performance tracking
+│   │   │   ├── useVirtualScroll.ts       # Large list optimization
+│   │   │   └── useOrdinalsApi.ts         # API integration
 │   │   ├── utils/           # Utility functions
+│   │   │   ├── batchFetcher.ts           # Concurrent loading utility
+│   │   │   ├── contentDetection.ts       # Content type analysis
+│   │   │   └── mimeTypes.ts              # MIME type utilities
 │   │   ├── data/            # Sample data and constants
 │   │   ├── App.tsx          # Main application component
 │   │   ├── main.tsx         # Application entry point
@@ -129,6 +159,8 @@ bitcoin-inscription-viewer/
 │   ├── advanced-usage.tsx   # Advanced configuration examples
 │   ├── wallet-integration.tsx # Wallet integration examples
 │   ├── library-demo.tsx     # Library showcase
+│   ├── enhanced-optimization.tsx  # Advanced optimization demo
+│   ├── advanced-optimization.tsx  # Complete optimization features
 │   └── ...                 # Additional example files
 │
 └── 🧪 Testing

@@ -70,7 +70,7 @@ export const InscriptionViewer = React.memo(function InscriptionViewer({
     }
 
     return (
-      <div key={key} className="inscription-card border rounded-lg overflow-hidden shadow-sm w-full h-full min-w-0 min-h-0">
+      <div key={key} className="inscription-card border rounded-lg overflow-hidden shadow-sm w-full h-full min-w-0 min-h-0 aspect-square">
         <InscriptionRenderer {...baseProps} className="w-full h-full" />
       </div>
     );

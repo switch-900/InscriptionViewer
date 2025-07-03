@@ -73,7 +73,7 @@ export function LazyInscriptionCard({
   return (
     <div 
       ref={cardRef} 
-      className={`lazy-inscription-card ${className}`}
+      className={`lazy-inscription-card w-full h-full aspect-square ${className}`}
       style={{ minHeight: '200px' }}
     >
       {isVisible ? (
@@ -92,7 +92,7 @@ export function LazyInscriptionCard({
           className="w-full h-full"
         />
       ) : (
-        <div className="flex items-center justify-center h-48 bg-gray-100 rounded-lg">
+        <div className="flex items-center justify-center w-full h-full bg-gray-100 rounded-lg aspect-square">
           <div className="text-gray-500">Loading...</div>
         </div>
       )}

@@ -23,11 +23,11 @@ interface InscriptionModalProps {
 }
 
 const modalSizes = {
-  sm: { size: 400, className: 'max-w-md' },
-  md: { size: 600, className: 'max-w-2xl' },
-  lg: { size: 800, className: 'max-w-4xl' },
-  xl: { size: 1000, className: 'max-w-6xl' },
-  full: { size: 1200, className: 'max-w-[95vw] max-h-[95vh]' }
+  sm: { size: 600, className: 'max-w-lg' },
+  md: { size: 800, className: 'max-w-3xl' },
+  lg: { size: 1000, className: 'max-w-5xl' },
+  xl: { size: 1200, className: 'max-w-7xl' },
+  full: { size: 1400, className: 'max-w-[95vw] max-h-[95vh]' }
 };
 
 export function InscriptionModal({
@@ -97,7 +97,7 @@ export function InscriptionModal({
         </DialogHeader>
         
         <div className="flex-1 p-6">
-          <div className="flex justify-center">
+          <div className="w-full h-full flex justify-center">
             <InscriptionRenderer
               inscriptionId={inscriptionId}
               inscriptionNumber={inscriptionNumber}
@@ -110,6 +110,7 @@ export function InscriptionModal({
               htmlRenderMode={htmlRenderMode}
               forceIframe={forceIframe}
               onAnalysisComplete={handleAnalysisComplete}
+              className="w-full max-w-full"
             />
           </div>
           

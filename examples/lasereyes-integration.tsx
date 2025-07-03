@@ -1,9 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LaserEyesInscriptionGallery } from '../src/components/LaserEyesInscriptionGallery';
+import { InscriptionRenderer } from '../src/components/InscriptionViewer';
+import { LaserEyesWallet } from '../src/services';
+
+// Mock LaserEyes wallet implementation for demonstration
+// In a real app, you would use the actual LaserEyes provider
+class MockLaserEyesWallet implements LaserEyesWallet {
+  private connected = false;
+  private address = 'bc1p...example...address';
+
+  async getInscriptionContent(inscriptionId: string): Promise<any> {
+    // This would call the actual LaserEyes RPC method: ord_content
+    console.log(`🔥 LaserEyes fetching content for: ${inscriptionId}`);
+    
+    // Simulate the ord_content RPC call
+    return await this._call('ord_content', [inscriptionId]);
+  }
+
+  private async _call(method: string, params: any[]): Promise<any> {
+    // Mock implementation - in real LaserEyes this would make RPC calls to Bitcoin node
+    console.log(`LaserEyes RPC call: ${method}`, params);
+    
+    // Simulate different content types for demonstration
+    const mockContent = {
+      content: "Hello from LaserEyes! This content was fetched directly from the Bitcoin node.",
+      contentType: "text/plain"
+    };
+    
+    // Add artificial delay to simulate network call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return mockContent;
+  }
+
+  isConnected(): boolean {
+    return this.connected;
+  }
+
+  getAddress(): string | null {
+    return this.connected ? this.address : null;
+  }
+
+  connect() {
+    this.connected = true;
+  }
+
+  disconnect() {
+    this.connected = false;
+  }
+}
 
 // Example: LaserEyes Wallet Integration
 const LaserEyesWalletExample: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'gallery' | 'compact' | 'showcase'>('gallery');
+  const [viewMode, setViewMode] = useState<'gallery' | 'compact' | 'showcase' | 'wallet-fetch'>('gallery');
+  const [wallet, setWallet] = useState<MockLaserEyesWallet | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    // Initialize LaserEyes wallet
+    const laserEyesWallet = new MockLaserEyesWallet();
+    setWallet(laserEyesWallet);
+  }, []);
+
+  const handleConnect = () => {
+    if (wallet) {
+      wallet.connect();
+      setIsConnected(true);
+    }
+  };
+
+  const handleDisconnect = () => {
+    if (wallet) {
+      wallet.disconnect();
+      setIsConnected(false);
+    }
+  };
 
   const handleInscriptionClick = (inscription: any) => {
     console.log('Inscription clicked:', inscription);
@@ -55,9 +126,104 @@ const LaserEyesWalletExample: React.FC = () => {
             viewMode === 'showcase' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
           }`}
         >
-          🎨 Showcase
+          ✨ Showcase
+        </button>
+        <button
+          onClick={() => setViewMode('wallet-fetch')}
+          className={`px-4 py-2 rounded ${
+            viewMode === 'wallet-fetch' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+          }`}
+        >
+          🔥 Wallet Fetch
         </button>
       </div>
+
+      {/* Wallet Connection Status */}
+      {viewMode === 'wallet-fetch' && (
+        <div className="text-center bg-gray-50 border rounded-lg p-4">
+          <h3 className="text-lg font-semibold mb-2">LaserEyes Wallet Connection</h3>
+          <div className="flex gap-4 justify-center mb-4">
+            {!isConnected ? (
+              <button
+                onClick={handleConnect}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Connect LaserEyes Wallet
+              </button>
+            ) : (
+              <button
+                onClick={handleDisconnect}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Disconnect Wallet
+              </button>
+            )}
+          </div>
+          
+          {isConnected && (
+            <p className="text-green-600">
+              ✅ Wallet connected: {wallet?.getAddress()}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Wallet Fetch Examples */}
+      {viewMode === 'wallet-fetch' && isConnected && (
+        <div className="space-y-6">
+          {/* Example 1: Basic LaserEyes integration */}
+          <div className="border rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-2">Direct Wallet Content Fetch</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              This inscription content is fetched directly from your Bitcoin node via LaserEyes wallet.
+            </p>
+            
+            <InscriptionRenderer
+              inscriptionId="6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0"
+              size={300}
+              laserEyesWallet={wallet || undefined}
+              preferLaserEyes={true}
+              showHeader={true}
+              showControls={true}
+            />
+          </div>
+
+          {/* Example 2: Comparison with API */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border rounded-lg p-4">
+              <h4 className="font-semibold mb-2">🔥 Via LaserEyes Wallet</h4>
+              <p className="text-xs text-gray-600 mb-2">Fetched directly from Bitcoin node</p>
+              <InscriptionRenderer
+                inscriptionId="6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0"
+                size={250}
+                laserEyesWallet={wallet || undefined}
+                preferLaserEyes={true}
+                showHeader={false}
+              />
+            </div>
+            <div className="border rounded-lg p-4">
+              <h4 className="font-semibold mb-2">🌐 Via API Endpoint</h4>
+              <p className="text-xs text-gray-600 mb-2">Fetched from ordinals.com API</p>
+              <InscriptionRenderer
+                inscriptionId="6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0"
+                size={250}
+                preferLaserEyes={false}
+                showHeader={false}
+              />
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="text-md font-semibold text-blue-800 mb-2">🔥 LaserEyes Benefits</h4>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• <strong>Decentralized:</strong> Content from your Bitcoin node</li>
+              <li>• <strong>Private:</strong> No external API dependencies</li>
+              <li>• <strong>Fast:</strong> Local node responses</li>
+              <li>• <strong>Reliable:</strong> Direct blockchain access</li>
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Gallery Views */}
       {viewMode === 'gallery' && (

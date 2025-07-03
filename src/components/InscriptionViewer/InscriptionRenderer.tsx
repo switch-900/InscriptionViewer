@@ -3,6 +3,7 @@ import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { analyzeContent, ContentAnalysis, shouldLazyLoad } from './contentAnalyzer';
 import { inscriptionCache } from '@/services/InscriptionContentCache';
+import { laserEyesService, LaserEyesWallet } from '@/services/LaserEyesService';
 import { TextRenderer } from './renderers/TextRenderer';
 import { ImageRenderer } from './renderers/ImageRenderer';
 import { VideoRenderer } from './renderers/VideoRenderer';
@@ -31,6 +32,9 @@ interface InscriptionRendererProps {
   htmlRenderMode?: 'iframe' | 'sandbox';
   forceIframe?: boolean;
   onAnalysisComplete?: (analysis: ContentAnalysis) => void;
+  laserEyesWallet?: LaserEyesWallet; // Optional LaserEyes wallet instance
+  preferLaserEyes?: boolean; // Whether to prefer LaserEyes over API endpoints
+  contentFetcher?: (inscriptionId: string) => Promise<any>; // Custom content fetcher
 }
 
 interface LoadedContent {
@@ -53,7 +57,10 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   apiEndpoint,
   htmlRenderMode = 'sandbox',
   forceIframe = false,
-  onAnalysisComplete
+  onAnalysisComplete,
+  laserEyesWallet,
+  preferLaserEyes = true,
+  contentFetcher // Add support for custom content fetcher
 }: InscriptionRendererProps) {
   const [loadedContent, setLoadedContent] = useState<LoadedContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,13 +69,19 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   const isMountedRef = useRef(true);
   const isAnalyzingRef = useRef(false);
   
-  // Reset mounted ref on component mount
+  // Reset mounted ref on component mount and setup LaserEyes wallet
   useEffect(() => {
     isMountedRef.current = true;
+    
+    // Set up LaserEyes wallet in service if provided
+    if (laserEyesWallet) {
+      laserEyesService.setWallet(laserEyesWallet);
+    }
+    
     return () => {
       isMountedRef.current = false;
     };
-  }, []);
+  }, [laserEyesWallet]);
   
   // Generate the content URL with configurable endpoint support
   const finalContentUrl = React.useMemo(() => {
@@ -168,7 +181,148 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
         }
       }
 
-      // Step 2: Not in cache, fetch from network
+      // Step 2: Try enhanced content fetcher first if available
+      if (contentFetcher) {
+        setLoadingStage('Fetching via enhanced fetcher...');
+        console.log('🚀 Attempting to fetch via enhanced fetcher for:', inscriptionId);
+        
+        try {
+          const fetcherContent = await contentFetcher(inscriptionId);
+          
+          if (fetcherContent && isMountedRef.current) {
+            console.log('✅ Successfully fetched via enhanced fetcher for:', inscriptionId);
+            
+            let blob: Blob;
+            let text: string | undefined;
+            let contentToCache: string;
+            let fetchedContentType = 'unknown';
+            
+            // Handle different content types from fetcher
+            if (typeof fetcherContent === 'string') {
+              text = fetcherContent;
+              fetchedContentType = 'text/plain';
+              blob = new Blob([text], { type: fetchedContentType });
+              contentToCache = text;
+            } else if (fetcherContent instanceof Blob) {
+              blob = fetcherContent;
+              fetchedContentType = blob.type || 'application/octet-stream';
+              const uint8Array = new Uint8Array(await blob.arrayBuffer());
+              contentToCache = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
+            } else if (fetcherContent && typeof fetcherContent === 'object') {
+              // Handle structured content (LaserEyes format)
+              if (fetcherContent.content && fetcherContent.contentType) {
+                fetchedContentType = fetcherContent.contentType;
+                if (typeof fetcherContent.content === 'string') {
+                  const textContent = fetcherContent.content;
+                  text = textContent;
+                  blob = new Blob([textContent], { type: fetchedContentType });
+                  contentToCache = textContent;
+                } else {
+                  blob = new Blob([fetcherContent.content], { type: fetchedContentType });
+                  const uint8Array = new Uint8Array(fetcherContent.content);
+                  contentToCache = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
+                }
+              } else {
+                // Fallback to JSON
+                const jsonText = JSON.stringify(fetcherContent);
+                text = jsonText;
+                fetchedContentType = 'application/json';
+                blob = new Blob([jsonText], { type: fetchedContentType });
+                contentToCache = jsonText;
+              }
+            } else {
+              throw new Error('Unsupported content format from fetcher');
+            }
+            
+            // Cache the content
+            try {
+              inscriptionCache.set(inscriptionId, contentToCache, fetchedContentType);
+              console.log('✅ Enhanced fetcher content cached for:', inscriptionId);
+            } catch (cacheError: any) {
+              console.warn('⚠️ Failed to cache enhanced fetcher content for:', inscriptionId, 'Error:', cacheError);
+            }
+            
+            // Create object URL and analyze content
+            const objectUrl = URL.createObjectURL(blob);
+            const analysis = await analyzeContent(objectUrl);
+            
+            if (!isMountedRef.current) return;
+            
+            setLoadedContent({
+              url: objectUrl,
+              blob,
+              text,
+              analysis
+            });
+            setIsLoading(false);
+            setLoadingStage('');
+            onAnalysisComplete?.(analysis);
+            return;
+          }
+        } catch (fetcherError: any) {
+          console.warn('⚠️ Enhanced fetcher failed, trying LaserEyes or falling back to API:', fetcherError.message);
+          // Continue to LaserEyes or API fallback
+        }
+      }
+
+      // Step 3: Try LaserEyes wallet if available and preferred
+      if (preferLaserEyes && laserEyesService.isAvailable()) {
+        setLoadingStage('Fetching via LaserEyes wallet...');
+        console.log('🔥 Attempting to fetch via LaserEyes for:', inscriptionId);
+        
+        try {
+          const laserEyesContent = await laserEyesService.getInscriptionContent(inscriptionId);
+          
+          if (laserEyesContent && isMountedRef.current) {
+            console.log('✅ Successfully fetched via LaserEyes for:', inscriptionId);
+            
+            let blob: Blob;
+            let text: string | undefined;
+            let contentToCache: string;
+            
+            if (typeof laserEyesContent.content === 'string') {
+              text = laserEyesContent.content;
+              blob = new Blob([text], { type: laserEyesContent.contentType });
+              contentToCache = text;
+            } else {
+              // ArrayBuffer content
+              blob = new Blob([laserEyesContent.content], { type: laserEyesContent.contentType });
+              const uint8Array = new Uint8Array(laserEyesContent.content);
+              contentToCache = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
+            }
+            
+            // Cache the content
+            try {
+              inscriptionCache.set(inscriptionId, contentToCache, laserEyesContent.contentType);
+              console.log('✅ LaserEyes content cached for:', inscriptionId);
+            } catch (cacheError: any) {
+              console.warn('⚠️ Failed to cache LaserEyes content for:', inscriptionId, 'Error:', cacheError);
+            }
+            
+            // Create object URL and analyze content
+            const objectUrl = URL.createObjectURL(blob);
+            const analysis = await analyzeContent(objectUrl);
+            
+            if (!isMountedRef.current) return;
+            
+            setLoadedContent({
+              url: objectUrl,
+              blob,
+              text,
+              analysis
+            });
+            setIsLoading(false);
+            setLoadingStage('');
+            onAnalysisComplete?.(analysis);
+            return;
+          }
+        } catch (laserEyesError: any) {
+          console.warn('⚠️ LaserEyes fetch failed, falling back to API:', laserEyesError.message);
+          // Continue to API fallback
+        }
+      }
+
+      // Step 4: Fall back to network API (original logic)
       setLoadingStage('Analyzing content...');
       console.log('🔍 Starting analysis for:', inscriptionId, 'URL:', finalContentUrl);
       
@@ -195,7 +349,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
       setLoadingStage('Loading content...');
       console.log('🔄 Loading content for:', inscriptionId, 'Type:', analysis.contentInfo.detectedType);
 
-      // Step 3: Load content based on analysis
+      // Step 5: Load content based on analysis (original API logic)
       const { contentInfo } = analysis;
       
       console.log('📦 Loading content with info:', contentInfo);
@@ -257,7 +411,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
         return;
       }
 
-      // Step 4: Cache the content
+      // Step 6: Cache the content
       setLoadingStage('Caching content...');
       console.log('💾 Caching content for:', inscriptionId);
       try {
@@ -496,7 +650,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
       style={{ 
         width: '100%',
         height: '100%',
-        minWidth: size,
+        minWidth: 'auto',
         minHeight: size,
         maxWidth: '100%',
         maxHeight: '100%',
