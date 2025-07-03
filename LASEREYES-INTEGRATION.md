@@ -61,8 +61,8 @@ function MyWallet() {
 
 ### 4. Enhanced Optimization Features
 
-```tsx
 {% raw %}
+```tsx
 import { EnhancedInscriptionViewer, useInscriptionCache } from 'bitcoin-inscription-viewer'
 
 function OptimizedWallet() {
@@ -113,6 +113,7 @@ function OptimizedWallet() {
 }
 {% endraw %}
 ```
+{% endraw %}
 
 ## 📋 API Reference
 
@@ -222,6 +223,7 @@ interface LaserEyesInscription {
 
 ### 🚀 High-Performance Marketplace Integration
 
+{% raw %}
 ```tsx
 import { useLaserEyes } from '@omnisat/lasereyes-react'
 import { 
@@ -326,9 +328,12 @@ function OptimizedMarketplaceView() {
   )
 }
 ```
+{% endraw %}
+{% endraw %}
 
 ### 🎮 Gaming Integration with Virtual Scrolling
 
+{% raw %}
 ```tsx
 import { 
   EnhancedInscriptionViewer, 
@@ -429,9 +434,11 @@ function GameInventory() {
   )
 }
 ```
+{% endraw %}
 
 ### 💼 Portfolio Tracker with Performance Monitoring
 
+{% raw %}
 ```tsx
 import { 
   EnhancedInscriptionViewer, 
@@ -585,9 +592,11 @@ function AdvancedPortfolioView() {
   )
 }
 ```
+{% endraw %}
 
 ### 🔍 Collection Browser with Advanced Search and Caching
 
+{% raw %}
 ```tsx
 import { 
   EnhancedInscriptionViewer, 
@@ -775,11 +784,13 @@ function AdvancedCollectionBrowser() {
   )
 }
 ```
+{% endraw %}
 
 ## 🎯 Best Practices
 
 ### 1. Performance Optimization
 
+{% raw %}
 ```tsx
 // Configure caching for optimal performance
 const cacheConfig = {
@@ -810,9 +821,11 @@ const getBatchSize = () => {
   }}
 />
 ```
+{% endraw %}
 
 ### 2. Smart Caching Strategy
 
+{% raw %}
 ```tsx
 import { useInscriptionCache, useServiceWorker } from 'bitcoin-inscription-viewer'
 
@@ -858,9 +871,11 @@ function SmartCachingExample() {
   )
 }
 ```
+{% endraw %}
 
 ### 3. Error Handling and Fallbacks
 
+{% raw %}
 ```tsx
 // Comprehensive error handling
 const CustomError = ({ error, onRetry }) => (
@@ -902,6 +917,7 @@ const CustomError = ({ error, onRetry }) => (
   }}
 />
 ```
+{% endraw %}
 
 ### 4. Mobile Optimization
 
@@ -940,6 +956,7 @@ const config = getMobileConfig()
 
 ### 5. Performance Monitoring and Analytics
 
+{% raw %}
 ```tsx
 import { useInscriptionPerformance } from 'bitcoin-inscription-viewer'
 
@@ -1017,9 +1034,11 @@ function PerformanceMonitoringExample() {
   )
 }
 ```
+{% endraw %}
 
 ### 6. Advanced LaserEyes Integration
 
+{% raw %}
 ```tsx
 import { useLaserEyes } from '@omnisat/lasereyes-react'
 
@@ -1096,6 +1115,7 @@ function AdvancedLaserEyesIntegration() {
   )
 }
 ```
+{% endraw %}
 
 ## 🔧 Troubleshooting
 
@@ -1119,6 +1139,7 @@ function AdvancedLaserEyesIntegration() {
 
 ### Debug Mode
 
+{% raw %}
 ```tsx
 // Enable comprehensive debugging
 <EnhancedInscriptionViewer
@@ -1136,6 +1157,7 @@ function AdvancedLaserEyesIntegration() {
   }}
 />
 ```
+{% endraw %}
 
 ### Performance Optimization Checklist
 

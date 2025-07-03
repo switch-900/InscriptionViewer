@@ -172,6 +172,7 @@ const endpoints = {
 ## 🎨 Layout Patterns
 
 ### Masonry Layout
+{% raw %}
 ```tsx
 import Masonry from 'react-masonry-css';
 
@@ -199,8 +200,11 @@ function MasonryGallery({ inscriptions }) {
   );
 }
 ```
+{% endraw %}
+{% endraw %}
 
 ### Carousel Layout
+{% raw %}
 ```tsx
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -227,6 +231,8 @@ function InscriptionCarousel({ inscriptions }) {
   );
 }
 ```
+{% endraw %}
+{% endraw %}
 
 ### Modal Integration
 ```tsx
@@ -469,6 +475,7 @@ function CustomRenderer({ content, mimeType }) {
 ```
 
 ### Context Integration
+{% raw %}
 ```tsx
 import { InscriptionContext } from 'bitcoin-inscription-viewer';
 
@@ -488,6 +495,8 @@ function CustomInscriptionProvider({ children }) {
   );
 }
 ```
+{% endraw %}
+{% endraw %}
 
 ### Custom Styling
 ```tsx
