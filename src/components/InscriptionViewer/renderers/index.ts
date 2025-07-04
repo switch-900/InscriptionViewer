@@ -12,6 +12,8 @@ export { JsonRenderer } from './JsonRenderer';
 export { HtmlRenderer } from './HtmlRenderer';
 export { ThreeDRenderer } from './ThreeDRenderer';
 export { IframeRenderer } from './IframeRenderer';
+export { CodeRenderer } from './CodeRenderer';
+export { DownloadRenderer } from './DownloadRenderer';
 
 // Import for default export
 import { TextRenderer } from './TextRenderer';
@@ -22,6 +24,8 @@ import { JsonRenderer } from './JsonRenderer';
 import { HtmlRenderer } from './HtmlRenderer';
 import { ThreeDRenderer } from './ThreeDRenderer';
 import { IframeRenderer } from './IframeRenderer';
+import { CodeRenderer } from './CodeRenderer';
+import { DownloadRenderer } from './DownloadRenderer';
 
 export default {
   TextRenderer,
@@ -31,5 +35,7 @@ export default {
   JsonRenderer,
   HtmlRenderer,
   ThreeDRenderer,
-  IframeRenderer
+  IframeRenderer,
+  CodeRenderer,
+  DownloadRenderer
 };

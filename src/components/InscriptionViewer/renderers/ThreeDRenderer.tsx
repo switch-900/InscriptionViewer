@@ -2,6 +2,12 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Download, RotateCcw, ZoomIn, ZoomOut, Move3D } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { safeExtensionFormat } from '../../../utils/safeFormatting';
 
 interface ThreeDRendererProps {
@@ -37,8 +43,8 @@ export function ThreeDRenderer({
   const rotationRef = useRef({ x: 0, y: 0 });
 
   const isSupported = React.useMemo(() => {
-    const supportedTypes = ['gltf', 'glb', 'obj'];
-    const supportedExts = ['gltf', 'glb', 'obj', 'stl'];
+    const supportedTypes = ['gltf', 'glb', 'obj', 'stl', 'ply', 'dae'];
+    const supportedExts = ['gltf', 'glb', 'obj', 'stl', 'ply', 'dae', '3ds', 'fbx'];
     
     return supportedTypes.some(type => mimeType.includes(type)) ||
            supportedExts.includes(fileExtension?.toLowerCase() || '');
@@ -99,18 +105,30 @@ export function ThreeDRenderer({
 
       let object: THREE.Object3D | null = null;
 
-      if (extension === 'obj') {
-        // Simple OBJ loader (basic implementation)
-        const text = new TextDecoder().decode(arrayBuffer);
-        object = parseOBJ(text);
-      } else if (extension === 'stl') {
-        // Simple STL loader
-        object = parseSTL(arrayBuffer);
-      } else {
-        // For GLTF/GLB and other formats, create a simple placeholder
-        const geometry = new THREE.BoxGeometry(2, 2, 2);
-        const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-        object = new THREE.Mesh(geometry, material);
+      console.log(`🎮 Loading 3D model: ${extension} format`);
+
+      switch (extension) {
+        case 'obj':
+          object = await loadOBJ(arrayBuffer);
+          break;
+        case 'stl':
+          object = await loadSTL(arrayBuffer);
+          break;
+        case 'ply':
+          object = await loadPLY(arrayBuffer);
+          break;
+        case 'dae':
+          object = await loadDAE(arrayBuffer);
+          break;
+        case 'gltf':
+        case 'glb':
+          object = await loadGLTF(arrayBuffer, extension);
+          break;
+        default:
+          // For unsupported formats, create an informative placeholder
+          console.warn(`Unsupported 3D format: ${extension || mimeType}`);
+          object = createUnsupportedPlaceholder(extension || 'unknown');
+          break;
       }
 
       if (object) {
@@ -119,9 +137,11 @@ export function ThreeDRenderer({
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         
-        object.position.sub(center);
-        const maxDim = Math.max(size.x, size.y, size.z);
+        // Prevent division by zero
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
         const scale = 3 / maxDim;
+        
+        object.position.sub(center);
         object.scale.setScalar(scale);
 
         // Remove previous model
@@ -131,112 +151,181 @@ export function ThreeDRenderer({
 
         sceneRef.current.add(object);
         modelRef.current = object;
+
+        console.log(`✅ Successfully loaded 3D model: ${extension}`);
       }
 
       setIsLoading(false);
     } catch (err) {
-      console.error('Failed to load model:', err);
-      setError('Failed to load 3D model');
+      console.error('Failed to load 3D model:', err);
+      const ext = fileExtension?.toLowerCase() || 'unknown';
+      setError(`Failed to load ${ext.toUpperCase()} model: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setIsLoading(false);
     }
   }, [src, fileExtension]);
 
-  // Simple OBJ parser
-  const parseOBJ = (text: string): THREE.Object3D => {
-    const lines = text.split('\n');
-    const vertices: number[] = [];
-    const faces: number[] = [];
-
-    for (const line of lines) {
-      const parts = line.trim().split(/\s+/);
-      if (parts.length < 2) continue; // Skip invalid lines
+  // GLTF/GLB loader
+  const loadGLTF = async (arrayBuffer: ArrayBuffer, extension: string): Promise<THREE.Object3D> => {
+    return new Promise((resolve, reject) => {
+      const loader = new GLTFLoader();
       
-      if (parts[0] === 'v' && parts.length >= 4) {
-        const x = parseFloat(parts[1]);
-        const y = parseFloat(parts[2]);
-        const z = parseFloat(parts[3]);
-        if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-          vertices.push(x, y, z);
-        }
-      } else if (parts[0] === 'f' && parts.length >= 4) {
-        // Simple triangulation (assumes triangular faces)
-        for (let i = 1; i < parts.length; i++) {
-          const vertexPart = parts[i].split('/');
-          if (vertexPart.length > 0 && vertexPart[0]) {
-            const vertexIndex = parseInt(vertexPart[0]) - 1;
-            if (!isNaN(vertexIndex) && vertexIndex >= 0) {
-              faces.push(vertexIndex);
-            }
-          }
+      if (extension === 'glb') {
+        // For GLB (binary), load directly from array buffer
+        loader.parse(arrayBuffer, '', (gltf) => {
+          resolve(gltf.scene);
+        }, (error) => {
+          console.error('Error loading GLB:', error);
+          reject(error);
+        });
+      } else {
+        // For GLTF (text), convert array buffer to string first
+        try {
+          const text = new TextDecoder().decode(arrayBuffer);
+          const blob = new Blob([text], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          
+          loader.load(url, (gltf) => {
+            URL.revokeObjectURL(url);
+            resolve(gltf.scene);
+          }, undefined, (error) => {
+            URL.revokeObjectURL(url);
+            console.error('Error loading GLTF:', error);
+            reject(error);
+          });
+        } catch (error) {
+          reject(error);
         }
       }
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    geometry.setIndex(faces);
-    geometry.computeVertexNormals();
-
-    const material = new THREE.MeshPhongMaterial({ color: 0x888888 });
-    return new THREE.Mesh(geometry, material);
+    });
   };
 
-  // Simple STL parser
-  const parseSTL = (buffer: ArrayBuffer): THREE.Object3D => {
-    const view = new DataView(buffer);
-    const isASCII = buffer.byteLength < 80 || view.getUint32(80, true) * 50 + 84 !== buffer.byteLength;
-
-    if (isASCII) {
-      // ASCII STL (simplified)
-      const text = new TextDecoder().decode(buffer);
-      const vertices: number[] = [];
-      const lines = text.split('\n');
-      
-      for (const line of lines) {
-        if (line.trim().startsWith('vertex')) {
-          const coords = line.trim().split(/\s+/).slice(1);
-          if (coords.length >= 3) {
-            const x = parseFloat(coords[0]);
-            const y = parseFloat(coords[1]);
-            const z = parseFloat(coords[2]);
-            if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-              vertices.push(x, y, z);
-            }
+  // OBJ loader using Three.js OBJLoader
+  const loadOBJ = async (arrayBuffer: ArrayBuffer): Promise<THREE.Object3D> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const text = new TextDecoder().decode(arrayBuffer);
+        const loader = new OBJLoader();
+        const object = loader.parse(text);
+        
+        // Apply default material if none exists
+        object.traverse((child) => {
+          if (child instanceof THREE.Mesh && !child.material) {
+            child.material = new THREE.MeshPhongMaterial({ color: 0x888888 });
           }
-        }
+        });
+        
+        resolve(object);
+      } catch (error) {
+        console.error('Error loading OBJ:', error);
+        reject(error);
       }
+    });
+  };
 
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-      geometry.computeVertexNormals();
-
-      const material = new THREE.MeshPhongMaterial({ color: 0xaaaaaa });
-      return new THREE.Mesh(geometry, material);
-    } else {
-      // Binary STL
-      const triangleCount = view.getUint32(80, true);
-      const vertices: number[] = [];
-
-      for (let i = 0; i < triangleCount; i++) {
-        const offset = 84 + i * 50;
-        // Skip normal vector (12 bytes)
-        for (let j = 0; j < 3; j++) {
-          const vertexOffset = offset + 12 + j * 12;
-          vertices.push(
-            view.getFloat32(vertexOffset, true),
-            view.getFloat32(vertexOffset + 4, true),
-            view.getFloat32(vertexOffset + 8, true)
-          );
-        }
+  // STL loader using Three.js STLLoader
+  const loadSTL = async (arrayBuffer: ArrayBuffer): Promise<THREE.Object3D> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const loader = new STLLoader();
+        const geometry = loader.parse(arrayBuffer);
+        geometry.computeVertexNormals();
+        
+        const material = new THREE.MeshPhongMaterial({ color: 0xaaaaaa });
+        const mesh = new THREE.Mesh(geometry, material);
+        
+        resolve(mesh);
+      } catch (error) {
+        console.error('Error loading STL:', error);
+        reject(error);
       }
+    });
+  };
 
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-      geometry.computeVertexNormals();
+  // PLY loader using Three.js PLYLoader
+  const loadPLY = async (arrayBuffer: ArrayBuffer): Promise<THREE.Object3D> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const loader = new PLYLoader();
+        const geometry = loader.parse(arrayBuffer);
+        geometry.computeVertexNormals();
+        
+        const material = new THREE.MeshPhongMaterial({ color: 0x999999 });
+        const mesh = new THREE.Mesh(geometry, material);
+        
+        resolve(mesh);
+      } catch (error) {
+        console.error('Error loading PLY:', error);
+        reject(error);
+      }
+    });
+  };
 
-      const material = new THREE.MeshPhongMaterial({ color: 0xaaaaaa });
-      return new THREE.Mesh(geometry, material);
+  // DAE (Collada) loader using Three.js ColladaLoader
+  const loadDAE = async (arrayBuffer: ArrayBuffer): Promise<THREE.Object3D> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const text = new TextDecoder().decode(arrayBuffer);
+        const loader = new ColladaLoader();
+        
+        // Create a blob URL for the Collada loader
+        const blob = new Blob([text], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        
+        loader.load(url, (collada) => {
+          URL.revokeObjectURL(url);
+          resolve(collada.scene);
+        }, undefined, (error) => {
+          URL.revokeObjectURL(url);
+          console.error('Error loading DAE:', error);
+          reject(error);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
+  // Create placeholder for unsupported formats
+  const createUnsupportedPlaceholder = (extension: string): THREE.Object3D => {
+    const group = new THREE.Group();
+    
+    // Create a wireframe box
+    const geometry = new THREE.BoxGeometry(2, 2, 2);
+    const wireframe = new THREE.WireframeGeometry(geometry);
+    const material = new THREE.LineBasicMaterial({ color: 0x888888 });
+    const box = new THREE.LineSegments(wireframe, material);
+    group.add(box);
+    
+    // Add text label
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (context) {
+      canvas.width = 512;
+      canvas.height = 256;
+      context.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      context.fillRect(0, 0, 512, 256);
+      context.fillStyle = '#333333';
+      context.font = 'bold 24px Arial';
+      context.textAlign = 'center';
+      context.fillText('Unsupported Format', 256, 100);
+      context.font = '20px Arial';
+      context.fillText(extension.toUpperCase(), 256, 140);
+      context.font = '16px Arial';
+      context.fillText('Download to view externally', 256, 180);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const labelMaterial = new THREE.MeshBasicMaterial({ 
+        map: texture, 
+        transparent: true,
+        alphaTest: 0.1
+      });
+      const labelGeometry = new THREE.PlaneGeometry(3, 1.5);
+      const label = new THREE.Mesh(labelGeometry, labelMaterial);
+      label.position.set(0, 2.5, 0);
+      group.add(label);
     }
+    
+    return group;
   };
 
   const animate = useCallback(() => {

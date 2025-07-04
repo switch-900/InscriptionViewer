@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] - 2025-07-04
+
+### 🐛 Critical Fixes
+- **FIXED**: Resolved TypeScript compilation errors in `InscriptionRenderer.tsx`
+- **FIXED**: Missing `contentInfo` and `analysis` variable declarations in network fetch logic
+- **FIXED**: Content loading pipeline now properly analyzes blob URLs before caching
+- **FIXED**: Audio renderer enhanced with better error handling and blob URL support
+- **FIXED**: 3D renderer animation loop optimization and memory leak prevention
+
+### 🔧 Enhanced
+- **IMPROVED**: Network fallback logic ensures content is always analyzed from correct blob URL
+- **IMPROVED**: Audio loading with comprehensive error messages and format detection
+- **IMPROVED**: Better debugging output for content analysis and loading stages
+- **IMPROVED**: Robust error handling for all supported audio formats (MP3, WAV, OGG, M4A, AAC, FLAC, WebM)
+
+### ✅ Verified
+- All TypeScript compilation errors resolved
+- Content pipeline working correctly with blob URLs
+- Audio and 3D renderers fully functional
+- Memory management optimized for large files
+
+## [2.3.3] - 2025-07-04
+
+### ✨ Major Enhancement: Comprehensive Content Type Support
+- **BREAKTHROUGH**: Implemented comprehensive MIME type analyzer supporting 100+ file types
+- **NEW**: Added specialized renderers for code files with syntax highlighting (`CodeRenderer`)
+- **NEW**: Added download-only renderer for archives, executables, documents (`DownloadRenderer`)
+- **EXPANDED**: Content type detection now handles:
+  - **Programming Languages**: 50+ languages (JavaScript, Python, Rust, Go, etc.)
+  - **Archives**: ZIP, RAR, 7z, TAR, GZIP, etc.
+  - **Documents**: Office files, PDFs, e-books (EPUB, MOBI)
+  - **Fonts**: TTF, OTF, WOFF, WOFF2
+  - **Executables**: EXE, MSI, DEB, RPM, AppImage
+  - **Data Files**: Databases, configs, logs
+  - **Advanced 3D**: Fixed GLTF/GLB loading with proper three.js GLTFLoader
+
+### 🔧 Enhanced Features
+- **Smart Rendering Strategy**: Files now automatically use the best rendering approach:
+  - Native renderers for viewable content
+  - Iframe for embeddable content  
+  - Download-only for binary files
+- **Rich Metadata**: Each file type includes display name, description, and category
+- **Better File Detection**: Enhanced magic byte detection and content-based analysis
+- **Safety Warnings**: Executable files show security warnings before download
+
+### 🐛 Fixed
+- **CRITICAL**: Fixed 3D model green box issue - now properly loads GLTF/GLB files
+- **CRITICAL**: Added GLTFLoader import and implementation for three.js 3D rendering
+- Enhanced error handling for unsupported and corrupted files
+- Improved content analysis reliability with fallback strategies
+
 ## [2.3.2] - 2025-07-03
 
 ### 🐛 Fixed

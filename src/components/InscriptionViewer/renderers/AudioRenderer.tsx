@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, VolumeX, Volume2, Download, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, VolumeX, Volume2, Download, SkipBack, SkipForward, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { safeMimeSubtype, safeExtensionFormat, safeFormatTime } from '../../../utils/safeFormatting';
@@ -13,7 +13,7 @@ interface AudioRendererProps {
 }
 
 /**
- * Native audio player with custom controls
+ * Native audio player with custom controls and enhanced error handling
  */
 export function AudioRenderer({ 
   src, 
@@ -29,43 +29,104 @@ export function AudioRenderer({
   const [volume, setVolume] = React.useState(1);
   const [isMuted, setIsMuted] = React.useState(false);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Support for common audio formats
+  const isSupportedFormat = React.useMemo(() => {
+    const supportedTypes = ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac', 'webm'];
+    const ext = fileExtension?.toLowerCase() || '';
+    return supportedTypes.includes(ext) || mimeType.startsWith('audio/');
+  }, [mimeType, fileExtension]);
+
+  // Helper function to get readable error messages
+  const getAudioErrorMessage = (errorCode: number): string => {
+    switch (errorCode) {
+      case 1: return 'Loading aborted';
+      case 2: return 'Network error';
+      case 3: return 'Decode error - unsupported format';
+      case 4: return 'Source not supported';
+      default: return 'Unknown error';
+    }
+  };
 
   React.useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    console.log('🎵 Setting up audio element for:', src, 'MIME:', mimeType);
+
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleDurationChange = () => setDuration(audio.duration);
+    const handleDurationChange = () => {
+      const dur = audio.duration;
+      if (isFinite(dur) && dur > 0) {
+        setDuration(dur);
+        setIsLoading(false);
+        console.log('✅ Audio duration loaded:', dur);
+      }
+    };
     const handleEnded = () => setIsPlaying(false);
-    const handleCanPlay = () => setIsLoaded(true);
-    const handleError = () => setError('Failed to load audio');
+    const handleCanPlay = () => {
+      setIsLoaded(true);
+      setIsLoading(false);
+      setError(null);
+      console.log('✅ Audio can play');
+    };
+    const handleLoadedData = () => {
+      setIsLoaded(true);
+      setIsLoading(false);
+      console.log('✅ Audio data loaded');
+    };
+    const handleError = (e: Event) => {
+      console.error('❌ Audio error:', e, audio.error);
+      const errorMsg = audio.error ? 
+        `Audio Error ${audio.error.code}: ${getAudioErrorMessage(audio.error.code)}` :
+        'Failed to load audio';
+      setError(errorMsg);
+      setIsLoading(false);
+      setIsLoaded(false);
+    };
+    const handleLoadStart = () => {
+      setIsLoading(true);
+      setError(null);
+      console.log('🎵 Audio load started');
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('loadeddata', handleLoadedData);
     audio.addEventListener('error', handleError);
+    audio.addEventListener('loadstart', handleLoadStart);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('loadeddata', handleLoadedData);
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('loadstart', handleLoadStart);
     };
-  }, []);
+  }, [src, mimeType]);
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || error) return;
 
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
+    try {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        await audio.play();
+        setIsPlaying(true);
+      }
+    } catch (err) {
+      console.error('Audio play error:', err);
+      setError('Failed to play audio');
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleSeek = (value: number[]) => {
@@ -129,14 +190,53 @@ export function AudioRenderer({
     }
   };
 
-  if (error) {
+  if (!isSupportedFormat) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
         <div className="text-center text-gray-500">
           <div className="text-2xl mb-2">🎵</div>
-          <div className="text-sm">Failed to load audio</div>
+          <div className="text-sm">Audio format not supported</div>
           <div className="text-xs mt-1 text-gray-400">
-            {mimeType} • {fileExtension}
+            {safeMimeSubtype(mimeType)} • {safeExtensionFormat(fileExtension)}
+          </div>
+          <div className="mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              className="text-xs"
+            >
+              <Download className="h-3 w-3 mr-1" />
+              Download Audio
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+        <div className="text-center text-gray-500">
+          <div className="text-2xl mb-2">⚠️</div>
+          <div className="text-sm text-red-600 dark:text-red-400">Audio Load Error</div>
+          <div className="text-xs mt-1 text-gray-400">
+            {error}
+          </div>
+          <div className="text-xs mt-1 text-gray-400">
+            {safeMimeSubtype(mimeType)} • {safeExtensionFormat(fileExtension)}
+          </div>
+          <div className="mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              className="text-xs"
+            >
+              <Download className="h-3 w-3 mr-1" />
+              Download Audio
+            </Button>
           </div>
         </div>
       </div>
@@ -146,7 +246,12 @@ export function AudioRenderer({
   return (
     <div className="w-full h-full flex flex-col" style={{ maxHeight }}>
       {/* Hidden audio element */}
-      <audio ref={audioRef} src={src} preload="metadata" />
+      <audio 
+        ref={audioRef} 
+        src={src} 
+        preload="metadata"
+        crossOrigin="anonymous"
+      />
 
       {/* Audio visualizer area */}
       <div 
@@ -157,16 +262,33 @@ export function AudioRenderer({
         }}
       >
         <div className="text-center">
-          <div className="text-6xl mb-4">🎵</div>
-          <div className="text-lg font-medium text-gray-700 dark:text-gray-300">
-            Audio Player
-          </div>
+          {isLoading ? (
+            <>
+              <div className="text-4xl mb-4 animate-pulse">🔄</div>
+              <div className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                Loading Audio...
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-6xl mb-4">🎵</div>
+              <div className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                Audio Player
+              </div>
+            </>
+          )}
+          
           <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {safeMimeSubtype(mimeType)} • {safeExtensionFormat(fileExtension)}
           </div>
           {duration > 0 && (
             <div className="text-xs text-gray-400 mt-2">
               Duration: {safeFormatTime(duration)}
+            </div>
+          )}
+          {!isLoaded && !isLoading && (
+            <div className="text-xs text-yellow-500 mt-2">
+              Click play to load audio
             </div>
           )}
         </div>
@@ -184,6 +306,7 @@ export function AudioRenderer({
                 max={100}
                 step={0.1}
                 className="w-full"
+                disabled={!isLoaded || isLoading}
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>{safeFormatTime(currentTime)}</span>
@@ -199,7 +322,7 @@ export function AudioRenderer({
                 variant="ghost"
                 size="sm"
                 onClick={() => skip(-10)}
-                disabled={!isLoaded}
+                disabled={!isLoaded || isLoading}
                 className="h-8 w-8 p-0"
               >
                 <SkipBack className="h-4 w-4" />
@@ -208,16 +331,22 @@ export function AudioRenderer({
                 variant="default"
                 size="sm"
                 onClick={togglePlay}
-                disabled={!isLoaded}
+                disabled={isLoading}
                 className="h-10 w-10 p-0 rounded-full"
               >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                {isLoading ? (
+                  <div className="animate-spin">⚙️</div>
+                ) : isPlaying ? (
+                  <Pause className="h-5 w-5" />
+                ) : (
+                  <Play className="h-5 w-5" />
+                )}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => skip(10)}
-                disabled={!isLoaded}
+                disabled={!isLoaded || isLoading}
                 className="h-8 w-8 p-0"
               >
                 <SkipForward className="h-4 w-4" />
@@ -231,6 +360,7 @@ export function AudioRenderer({
                 size="sm"
                 onClick={toggleMute}
                 className="h-8 w-8 p-0"
+                disabled={isLoading}
               >
                 {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
@@ -240,6 +370,7 @@ export function AudioRenderer({
                   onValueChange={handleVolumeChange}
                   max={100}
                   step={1}
+                  disabled={isLoading}
                 />
               </div>
               <Button

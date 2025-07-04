@@ -12,6 +12,8 @@ import { JsonRenderer } from './renderers/JsonRenderer';
 import { HtmlRenderer } from './renderers/HtmlRenderer';
 import { ThreeDRenderer } from './renderers/ThreeDRenderer';
 import { IframeRenderer } from './renderers/IframeRenderer';
+import { CodeRenderer } from './renderers/CodeRenderer';
+import { DownloadRenderer } from './renderers/DownloadRenderer';
 
 /**
  * Smart Inscription Content Renderer
@@ -188,11 +190,12 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
         }
         
         if (blob) {
-          const analysis = await analyzeContent(finalContentUrl);
+          const objectUrl = URL.createObjectURL(blob);
+          
+          // Analyze content using the blob directly, not the original URL
+          const analysis = await analyzeContent(objectUrl);
           
           if (!isMountedRef.current) return;
-          
-          const objectUrl = URL.createObjectURL(blob);
           
           setLoadedContent({
             url: objectUrl,
@@ -349,62 +352,37 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
       }
 
       // Step 4: Fall back to network API (original logic)
-      setLoadingStage('Analyzing content...');
-      console.log('🔍 Starting analysis for:', inscriptionId, 'URL:', finalContentUrl);
-      
-      const analysis = await analyzeContent(finalContentUrl);
-      console.log('📊 Analysis completed for:', inscriptionId, 'Result:', analysis);
-      
-      if (!isMountedRef.current) {
-        console.log('⚠️ Component unmounted during analysis for:', inscriptionId);
-        return;
-      }
-      
-      if (analysis.error) {
-        console.error('❌ Analysis error for:', inscriptionId, 'Error:', analysis.error);
-        throw new Error(`Analysis failed: ${analysis.error}`);
-      }
-
-      if (!analysis.contentInfo) {
-        console.error('❌ No content info in analysis for:', inscriptionId);
-        throw new Error('Analysis completed but no content info available');
-      }
-
-      console.log('✅ Analysis successful for:', inscriptionId, 'Type:', analysis.contentInfo.detectedType);
-      onAnalysisComplete?.(analysis);
       setLoadingStage('Loading content...');
-      console.log('🔄 Loading content for:', inscriptionId, 'Type:', analysis.contentInfo.detectedType);
-
-      // Step 5: Load content based on analysis (original API logic)
-      const { contentInfo } = analysis;
+      console.log('🔍 Starting network load for:', inscriptionId, 'URL:', finalContentUrl);
       
-      console.log('📦 Loading content with info:', contentInfo);
-      
+      // Load content first
       let blob: Blob;
       let text: string | undefined;
       let contentToCache: string;
+      let detectedContentType: string;
 
       try {
-        if (contentInfo.detectedType === 'text' || contentInfo.detectedType === 'json' || contentInfo.detectedType === 'html') {
+        const response = await fetch(finalContentUrl);
+        console.log('📡 Network fetch response:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        detectedContentType = response.headers.get('content-type') || 'application/octet-stream';
+        console.log('� Detected content type:', detectedContentType);
+
+        // Decide how to load based on content type
+        if (detectedContentType.startsWith('text/') || detectedContentType.includes('json') || detectedContentType.includes('html')) {
           // Load as text for text-based content
           console.log('📝 Loading as text content for:', inscriptionId);
-          const response = await fetch(finalContentUrl);
-          console.log('📝 Text fetch response:', response.status, response.statusText);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
           text = await response.text();
           contentToCache = text;
-          blob = new Blob([text], { type: contentInfo.mimeType });
+          blob = new Blob([text], { type: detectedContentType });
           console.log('✅ Text content loaded for:', inscriptionId, 'length:', text.length);
         } else {
           // Load as blob for binary content
           console.log('🖼️ Loading as binary content for:', inscriptionId);
-          const response = await fetch(finalContentUrl);
-          console.log('🖼️ Binary fetch response:', response.status, response.statusText);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
           blob = await response.blob();
           console.log('✅ Binary content loaded for:', inscriptionId, 'size:', blob.size);
           
@@ -426,35 +404,43 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
             // For small files, use the original method
             contentToCache = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
           }
-        }        } catch (fetchError: any) {
-          console.error('❌ Content fetch failed for:', inscriptionId, 'Error:', fetchError);
-          
-          // Check if this is a permanent error (404, 400)
-          if (fetchError.message?.includes('PERMANENT_ERROR') || 
-              fetchError.message?.includes('404') || 
-              fetchError.message?.includes('400')) {
-            throw new Error(`PERMANENT: ${fetchError.message}`);
-          }
-          
-          throw new Error(`Content loading failed: ${fetchError.message}`);
         }
+      } catch (fetchError: any) {
+        console.error('❌ Content fetch failed for:', inscriptionId, 'Error:', fetchError);
+        
+        // Check if this is a permanent error (404, 400)
+        if (fetchError.message?.includes('PERMANENT_ERROR') || 
+            fetchError.message?.includes('404') || 
+            fetchError.message?.includes('400')) {
+          throw new Error(`PERMANENT: ${fetchError.message}`);
+        }
+        
+        throw new Error(`Content loading failed: ${fetchError.message}`);
+      }
 
       if (!isMountedRef.current) {
         console.log('⚠️ Component unmounted during content loading for:', inscriptionId);
         return;
       }
 
+      // Step 5: Analyze content
+      setLoadingStage('Analyzing content...');
+      console.log('🔍 Analyzing content for:', inscriptionId);
+      const objectUrl = URL.createObjectURL(blob);
+      const analysis = await analyzeContent(objectUrl);
+      
+      if (!isMountedRef.current) return;
+
       // Step 6: Cache the content
       setLoadingStage('Caching content...');
       console.log('💾 Caching content for:', inscriptionId);
       try {
-        inscriptionCache.set(inscriptionId, contentToCache, contentInfo.mimeType);
+        inscriptionCache.set(inscriptionId, contentToCache, detectedContentType);
         console.log('✅ Content cached for:', inscriptionId);
       } catch (cacheError: any) {
         console.warn('⚠️ Failed to cache content for:', inscriptionId, 'Error:', cacheError);
       }
 
-      const objectUrl = URL.createObjectURL(blob);
       console.log('🎯 Created object URL for:', inscriptionId, 'URL:', objectUrl);
       
       const newLoadedContent = {
@@ -616,6 +602,18 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
           />
         );
 
+      case 'code':
+        return (
+          <CodeRenderer
+            content={loadedContent.text || ''}
+            mimeType={contentInfo.mimeType}
+            fileExtension={contentInfo.fileExtension}
+            maxHeight={maxHeight}
+            showControls={showControls}
+            language={contentInfo.displayName}
+          />
+        );
+
       case 'json':
         return (
           <JsonRenderer
@@ -633,6 +631,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
             <IframeRenderer
               src={loadedContent.url}
               mimeType={contentInfo.mimeType}
+              fileExtension={contentInfo.fileExtension}
               maxHeight={maxHeight}
               showControls={showControls}
             />
@@ -695,13 +694,58 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
           />
         );
 
-      case 'binary':
-      case 'unknown':
-      default:
+      case 'pdf':
         return (
           <IframeRenderer
             src={loadedContent.url}
             mimeType={contentInfo.mimeType}
+            fileExtension={contentInfo.fileExtension}
+            maxHeight={maxHeight}
+            showControls={showControls}
+          />
+        );
+
+      case 'archive':
+      case 'document':
+      case 'ebook':
+      case 'executable':
+      case 'font':
+      case 'data':
+        return (
+          <DownloadRenderer
+            src={loadedContent.url}
+            mimeType={contentInfo.mimeType}
+            fileExtension={contentInfo.fileExtension}
+            maxHeight={maxHeight}
+            showControls={showControls}
+            displayName={contentInfo.displayName}
+            description={contentInfo.description}
+          />
+        );
+
+      case 'binary':
+      case 'unknown':
+      default:
+        // Try iframe first for unknown types, fall back to download
+        if (contentInfo.renderStrategy === 'download') {
+          return (
+            <DownloadRenderer
+              src={loadedContent.url}
+              mimeType={contentInfo.mimeType}
+              fileExtension={contentInfo.fileExtension}
+              maxHeight={maxHeight}
+              showControls={showControls}
+              displayName={contentInfo.displayName}
+              description={contentInfo.description}
+            />
+          );
+        }
+        
+        return (
+          <IframeRenderer
+            src={loadedContent.url}
+            mimeType={contentInfo.mimeType}
+            fileExtension={contentInfo.fileExtension}
             maxHeight={maxHeight}
             showControls={showControls}
           />
