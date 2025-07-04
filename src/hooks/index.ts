@@ -18,9 +18,12 @@ export {
 
 export { 
   useInscriptionPerformance,
-  type PerformanceMetrics
+  type PerformanceMetrics,
+  type PerformanceEvent
 } from './usePerformanceMonitor';
 
 export { 
-  useVirtualScroll 
+  useVirtualScroll,
+  type VirtualScrollConfig,
+  type VirtualScrollResult
 } from './useVirtualScroll';

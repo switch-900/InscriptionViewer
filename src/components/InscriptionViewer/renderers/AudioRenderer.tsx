@@ -2,6 +2,7 @@ import React from 'react';
 import { Play, Pause, VolumeX, Volume2, Download, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { safeMimeSubtype, safeExtensionFormat, safeFormatTime } from '../../../utils/safeFormatting';
 
 interface AudioRendererProps {
   src: string;
@@ -19,7 +20,7 @@ export function AudioRenderer({
   mimeType, 
   fileExtension,
   maxHeight = 300,
-  showControls = true 
+  showControls = false 
 }: AudioRendererProps) {
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -69,21 +70,26 @@ export function AudioRenderer({
 
   const handleSeek = (value: number[]) => {
     const audio = audioRef.current;
-    if (!audio || !duration) return;
+    if (!audio || !duration || !Array.isArray(value) || value.length === 0) return;
     
     const newTime = (value[0] / 100) * duration;
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
+    if (!isNaN(newTime) && isFinite(newTime)) {
+      audio.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
   };
 
   const handleVolumeChange = (value: number[]) => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !Array.isArray(value) || value.length === 0) return;
     
     const newVolume = value[0] / 100;
-    audio.volume = newVolume;
-    setVolume(newVolume);
-    setIsMuted(newVolume === 0);
+    if (!isNaN(newVolume) && isFinite(newVolume)) {
+      const clampedVolume = Math.max(0, Math.min(1, newVolume));
+      audio.volume = clampedVolume;
+      setVolume(clampedVolume);
+      setIsMuted(clampedVolume === 0);
+    }
   };
 
   const toggleMute = () => {
@@ -123,12 +129,6 @@ export function AudioRenderer({
     }
   };
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
@@ -144,23 +144,29 @@ export function AudioRenderer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="w-full h-full flex flex-col" style={{ maxHeight }}>
       {/* Hidden audio element */}
       <audio ref={audioRef} src={src} preload="metadata" />
 
       {/* Audio visualizer area */}
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 min-h-32">
+      <div 
+        className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900" 
+        style={{ 
+          minHeight: showControls ? '120px' : '200px',
+          maxHeight: maxHeight - (showControls ? 120 : 0)
+        }}
+      >
         <div className="text-center">
           <div className="text-6xl mb-4">🎵</div>
           <div className="text-lg font-medium text-gray-700 dark:text-gray-300">
             Audio Player
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {mimeType.split('/')[1].toUpperCase()} • {fileExtension}
+            {safeMimeSubtype(mimeType)} • {safeExtensionFormat(fileExtension)}
           </div>
           {duration > 0 && (
             <div className="text-xs text-gray-400 mt-2">
-              Duration: {formatTime(duration)}
+              Duration: {safeFormatTime(duration)}
             </div>
           )}
         </div>
@@ -180,8 +186,8 @@ export function AudioRenderer({
                 className="w-full"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
+                <span>{safeFormatTime(currentTime)}</span>
+                <span>{safeFormatTime(duration)}</span>
               </div>
             </div>
           )}

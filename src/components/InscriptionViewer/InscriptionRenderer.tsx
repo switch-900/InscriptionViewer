@@ -18,6 +18,11 @@ import { IframeRenderer } from './renderers/IframeRenderer';
  * Analyzes content type and renders with the most appropriate native renderer
  */
 
+// Cache for failed inscriptions to prevent repeated attempts
+const failedInscriptionsCache = new Map<string, { error: string; timestamp: number; isPermanent: boolean }>();
+const FAILED_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes for temporary failures
+const PERMANENT_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours for permanent failures
+
 interface InscriptionRendererProps {
   inscriptionId: string;
   inscriptionNumber?: number | string;
@@ -51,8 +56,8 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   contentType,
   size = 400,
   className = '',
-  showHeader = true,
-  showControls = true,
+  showHeader = false,
+  showControls = false,
   autoLoad = true,
   apiEndpoint,
   htmlRenderMode = 'sandbox',
@@ -65,6 +70,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   const [loadedContent, setLoadedContent] = useState<LoadedContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPermanentError, setIsPermanentError] = useState(false);
   const [loadingStage, setLoadingStage] = useState<string>('');
   const isMountedRef = useRef(true);
   const isAnalyzingRef = useRef(false);
@@ -123,9 +129,29 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
     }
     
     console.log('🚀 Starting loadContent for:', inscriptionId);
+    
+    // Check failed inscriptions cache first
+    const failedEntry = failedInscriptionsCache.get(inscriptionId);
+    if (failedEntry) {
+      const cacheExpiry = failedEntry.isPermanent ? PERMANENT_CACHE_DURATION : FAILED_CACHE_DURATION;
+      const isExpired = Date.now() - failedEntry.timestamp > cacheExpiry;
+      
+      if (!isExpired) {
+        console.log('🚫 Using cached failure for:', inscriptionId, 'Permanent:', failedEntry.isPermanent);
+        setError(failedEntry.error);
+        setIsPermanentError(failedEntry.isPermanent);
+        setIsLoading(false);
+        return;
+      } else {
+        // Expired, remove from cache
+        failedInscriptionsCache.delete(inscriptionId);
+      }
+    }
+    
     isAnalyzingRef.current = true;
     setIsLoading(true);
     setError(null);
+    setIsPermanentError(false);
     setLoadingStage('Checking cache...');
 
     try {
@@ -400,11 +426,18 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
             // For small files, use the original method
             contentToCache = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
           }
+        }        } catch (fetchError: any) {
+          console.error('❌ Content fetch failed for:', inscriptionId, 'Error:', fetchError);
+          
+          // Check if this is a permanent error (404, 400)
+          if (fetchError.message?.includes('PERMANENT_ERROR') || 
+              fetchError.message?.includes('404') || 
+              fetchError.message?.includes('400')) {
+            throw new Error(`PERMANENT: ${fetchError.message}`);
+          }
+          
+          throw new Error(`Content loading failed: ${fetchError.message}`);
         }
-      } catch (fetchError: any) {
-        console.error('❌ Content fetch failed for:', inscriptionId, 'Error:', fetchError);
-        throw new Error(`Content loading failed: ${fetchError.message}`);
-      }
 
       if (!isMountedRef.current) {
         console.log('⚠️ Component unmounted during content loading for:', inscriptionId);
@@ -452,10 +485,34 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
         errorMessage: err.message,
         errorStack: err.stack
       });
+      
       if (isMountedRef.current) {
-        setError(err.message || 'Failed to load content');
+        const errorMessage = err.message || 'Failed to load content';
+        
+        // Check if this is a permanent error (404, 400, or explicitly marked)
+        const isPermanent = errorMessage.includes('PERMANENT') || 
+                           errorMessage.includes('404') || 
+                           errorMessage.includes('400') ||
+                           errorMessage.includes('Not Found') ||
+                           errorMessage.includes('Bad Request');
+        
+        // Cache the failed inscription to prevent repeated attempts
+        failedInscriptionsCache.set(inscriptionId, {
+          error: errorMessage,
+          timestamp: Date.now(),
+          isPermanent
+        });
+        
+        setIsPermanentError(isPermanent);
+        setError(errorMessage);
         setIsLoading(false);
         setLoadingStage('');
+        
+        if (isPermanent) {
+          console.warn('🚫 Permanent error detected and cached, retries disabled for:', inscriptionId);
+        } else {
+          console.warn('⚠️ Temporary error cached for:', inscriptionId);
+        }
       }
     } finally {
       isAnalyzingRef.current = false;
@@ -463,11 +520,21 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   }, [finalContentUrl, inscriptionId, onAnalysisComplete]);
 
   const handleRetry = useCallback(() => {
+    // Don't allow retry for permanent errors
+    if (isPermanentError) {
+      console.warn('🚫 Retry blocked for permanent error:', inscriptionId);
+      return;
+    }
+    
+    // Clear the failed cache entry for this inscription
+    failedInscriptionsCache.delete(inscriptionId);
+    
     if (loadedContent?.url) {
       URL.revokeObjectURL(loadedContent.url);
     }
     setLoadedContent(null);
     setError(null);
+    setIsPermanentError(false);
     isAnalyzingRef.current = false; // Reset the analyzing flag
     
     // Call loadContent directly without dependency
@@ -476,7 +543,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
         loadContent();
       }
     }, 50);
-  }, [loadedContent]); // Remove loadContent dependency
+  }, [loadedContent, isPermanentError, inscriptionId]); // Add inscriptionId dependency
 
   // Initial load
   useEffect(() => {
@@ -535,7 +602,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
       hasText: !!loadedContent.text,
       hasUrl: !!loadedContent.url
     });
-    const maxHeight = size - (showHeader ? 40 : 0) - (showControls ? 40 : 0);
+    const maxHeight = size - (showHeader ? 40 : 0) - (showControls ? 20 : 0); // Reduced control height deduction
 
     switch (contentInfo.detectedType) {
       case 'text':
@@ -646,12 +713,12 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   
   return (
     <div 
-      className={`border rounded-lg shadow-sm bg-white dark:bg-gray-900 overflow-hidden ${className}`}
+      className={`overflow-hidden ${className}`}
       style={{ 
         width: '100%',
         height: '100%',
         minWidth: 'auto',
-        minHeight: size,
+        minHeight: showHeader ? size : 'auto', // Only set minHeight if header is shown
         maxWidth: '100%',
         maxHeight: '100%',
         display: 'flex',
@@ -671,7 +738,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
               </span>
             )}
           </div>
-          {error && (
+          {error && !isPermanentError && (
             <Button
               variant="ghost"
               size="sm"
@@ -686,7 +753,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
       )}
       
       {/* Content area */}
-      <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden" style={{ minHeight: `${size - headerHeight}px` }}>
+      <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden" style={{ minHeight: showHeader ? `${size - headerHeight}px` : `${size}px` }}>
         {/* Loading state */}
         {isLoading && (
           <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center z-10">
@@ -706,20 +773,42 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
         {error && !isLoading && (
           <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
             <div className="text-center text-gray-500">
-              <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-              <div className="text-xs mb-2 max-w-48 px-2">{error}</div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRetry}
-                className="text-xs"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Retry
-              </Button>
+              <AlertCircle className={`h-8 w-8 mx-auto mb-2 ${isPermanentError ? 'text-orange-500' : 'text-red-500'}`} />
+              <div className="text-xs mb-2 max-w-48 px-2">
+                {error.includes('HTTP 400') || error.includes('400') 
+                  ? 'Invalid inscription ID (400)' 
+                  : error.includes('HTTP 404') || error.includes('404')
+                  ? 'Inscription not found (404)'
+                  : error.includes('Failed to fetch') || error.includes('network')
+                  ? 'Network error - Check connection'
+                  : error.includes('PERMANENT')
+                  ? 'Inscription unavailable'
+                  : error}
+              </div>
+              {!isPermanentError && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRetry}
+                  className="text-xs"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Retry
+                </Button>
+              )}
               <div className="text-xs text-gray-400 mt-2">
                 #{inscriptionNumber || 'N/A'}
               </div>
+              {isPermanentError && (
+                <div className="text-xs text-gray-400 mt-1 max-w-48 px-2">
+                  This inscription cannot be loaded
+                </div>
+              )}
+              {(error.includes('400') || error.includes('404')) && (
+                <div className="text-xs text-gray-400 mt-1 max-w-48 px-2">
+                  This inscription ID may not exist or be invalid
+                </div>
+              )}
             </div>
           </div>
         )}

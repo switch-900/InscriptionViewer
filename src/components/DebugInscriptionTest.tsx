@@ -57,7 +57,7 @@ export const DebugInscriptionTest: React.FC = () => {
           <div className="border rounded" style={{ width: 200, height: 200 }}>
             <InscriptionRenderer
               key={testId}
-              inscriptionId={testId.split('?')[0]} // Remove timestamp
+              inscriptionId={testId.includes('?') ? testId.split('?')[0] : testId} // Remove timestamp safely
               size={200}
               showHeader={true}
               showControls={true}

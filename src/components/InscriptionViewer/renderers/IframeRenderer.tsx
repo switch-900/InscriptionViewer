@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getFormatLabel } from '../../../utils/safeFormatting';
 
 interface IframeRendererProps {
   src: string;
@@ -74,7 +75,7 @@ export function IframeRenderer({
         <div className="flex justify-between items-center p-2 border-b bg-gray-50 dark:bg-gray-800">
           <div className="text-xs text-gray-600 dark:text-gray-400">
             <span className="font-mono">
-              {fileExtension?.toUpperCase() || mimeType.split('/')[1].toUpperCase()}
+              {getFormatLabel(mimeType, fileExtension)}
             </span>
             <span className="ml-2 text-gray-500">(iframe)</span>
           </div>
@@ -111,12 +112,17 @@ export function IframeRenderer({
       )}
 
       {/* Content */}
-      <div className="flex-1 relative bg-white dark:bg-gray-900">
+      <div 
+        className="flex-1 relative bg-white dark:bg-gray-900"
+        style={{
+          maxHeight: maxHeight - (showControls ? 50 : 0),
+          minHeight: '200px'
+        }}
+      >
         <iframe
           ref={iframeRef}
           src={src}
           className="w-full h-full border-0"
-          style={{ maxHeight }}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
           onLoad={handleLoad}
           onError={handleError}

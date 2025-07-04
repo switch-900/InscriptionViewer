@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] - 2025-07-03
+
+### 🐛 Fixed
+- **CRITICAL**: Fixed runtime `toUpperCase()` errors in all renderer components
+- **CRITICAL**: Added safe formatting utilities to prevent string manipulation errors  
+- **CRITICAL**: Fixed unsafe array access in video/audio controls
+- **CRITICAL**: Improved OBJ and STL file parsing with proper validation
+- **CRITICAL**: Added comprehensive error boundaries for better error handling
+
+### ✨ Added
+- `safeFormatting.ts` utility with `safeMimeSubtype()`, `safeExtensionFormat()`, `getFormatLabel()`, `safeFormatTime()`, `safeFormatFileSize()`
+- `ErrorBoundary` component with hooks (`useErrorBoundary`, `withErrorBoundary`)
+- Comprehensive input validation for all media controls
+- Better error handling in 3D model parsers
+
+### 🔧 Changed
+- All renderer components now use safe formatting utilities
+- Slider component now validates array inputs
+- Video/Audio renderers validate slider values before applying
+- 3D model parsers include proper bounds checking
+
+## [2.3.1] - 2025-01-03
+
+### Fixed
+- **CRITICAL: Fixed Test Page Examples** - Many test pages were showing "aspirational" features that don't exist yet
+- Updated all test pages to only demonstrate working functionality
+- Created comprehensive "Working Features Only" page for production reference
+- Added "Library Status Update" page explaining the issue and solutions
+
+### Added
+- `test-pages/working-features-only.html` - Authoritative reference for working features only
+- `test-pages/library-status-update.html` - Explains the examples vs. reality situation
+- Clear documentation of actual vs. aspirational APIs
+
+### Documentation
+- Updated README with important notice about test page fixes
+- Added warning banner to test pages index
+- Corrected all code examples to use actual working APIs
+- Fixed misleading prop examples in advanced usage demos
+
 ## [2.3.0] - 2025-01-20
 
 ### Added

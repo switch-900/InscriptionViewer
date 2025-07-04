@@ -10,7 +10,9 @@ export interface VirtualScrollConfig {
   itemHeight: number;
   containerHeight: number;
   overscan?: number; // Number of items to render outside viewport
+  prefetchDistance?: number; // How far ahead to prefetch content
   enabled?: boolean;
+  onPrefetch?: (items: InscriptionData[], startIndex: number, endIndex: number) => void;
 }
 
 export interface VirtualScrollResult {
@@ -21,6 +23,8 @@ export interface VirtualScrollResult {
   containerRef: React.RefObject<HTMLDivElement | null>;
   wrapperStyle: React.CSSProperties;
   viewportStyle: React.CSSProperties;
+  currentRange: { startIndex: number; endIndex: number };
+  prefetchRange: { startIndex: number; endIndex: number };
 }
 
 export const useVirtualScroll = (
@@ -34,29 +38,38 @@ export const useVirtualScroll = (
     itemHeight,
     containerHeight,
     overscan = 5,
-    enabled = true
+    prefetchDistance = 10,
+    enabled = true,
+    onPrefetch
   } = config;
 
   const onScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(event.currentTarget.scrollTop);
   }, []);
 
-  const { visibleItems, totalHeight, startIndex, endIndex } = useMemo(() => {
+  const { visibleItems, totalHeight, startIndex, endIndex, prefetchStartIndex, prefetchEndIndex } = useMemo(() => {
     if (!enabled || items.length === 0) {
       return {
         visibleItems: items,
         totalHeight: items.length * itemHeight,
         startIndex: 0,
-        endIndex: items.length - 1
+        endIndex: items.length - 1,
+        prefetchStartIndex: 0,
+        prefetchEndIndex: items.length - 1
       };
     }
 
     const totalHeight = items.length * itemHeight;
-    const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-    const endIndex = Math.min(
-      items.length - 1,
-      Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
-    );
+    const viewportStartIndex = Math.floor(scrollTop / itemHeight);
+    const viewportEndIndex = Math.ceil((scrollTop + containerHeight) / itemHeight);
+    
+    // Calculate visible range with overscan for smoother scrolling
+    const startIndex = Math.max(0, viewportStartIndex - overscan);
+    const endIndex = Math.min(items.length - 1, viewportEndIndex + overscan);
+    
+    // Calculate prefetch range for even smoother experience
+    const prefetchStartIndex = Math.max(0, viewportStartIndex - prefetchDistance);
+    const prefetchEndIndex = Math.min(items.length - 1, viewportEndIndex + prefetchDistance);
 
     const visibleItems = items.slice(startIndex, endIndex + 1);
 
@@ -64,9 +77,19 @@ export const useVirtualScroll = (
       visibleItems,
       totalHeight,
       startIndex,
-      endIndex
+      endIndex,
+      prefetchStartIndex,
+      prefetchEndIndex
     };
-  }, [items, scrollTop, itemHeight, containerHeight, overscan, enabled]);
+  }, [items, scrollTop, itemHeight, containerHeight, overscan, prefetchDistance, enabled]);
+
+  // Trigger prefetch callback when prefetch range changes
+  useEffect(() => {
+    if (onPrefetch && enabled && items.length > 0) {
+      const prefetchItems = items.slice(prefetchStartIndex, prefetchEndIndex + 1);
+      onPrefetch(prefetchItems, prefetchStartIndex, prefetchEndIndex);
+    }
+  }, [items, prefetchStartIndex, prefetchEndIndex, onPrefetch, enabled]);
 
   const wrapperStyle: React.CSSProperties = {
     height: totalHeight,
@@ -81,6 +104,9 @@ export const useVirtualScroll = (
     right: 0
   };
 
+  const currentRange = { startIndex, endIndex };
+  const prefetchRange = { startIndex: prefetchStartIndex, endIndex: prefetchEndIndex };
+
   return {
     visibleItems,
     totalHeight,
@@ -88,6 +114,8 @@ export const useVirtualScroll = (
     onScroll,
     containerRef,
     wrapperStyle,
-    viewportStyle
+    viewportStyle,
+    currentRange,
+    prefetchRange
   };
 };

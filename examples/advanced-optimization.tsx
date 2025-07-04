@@ -287,7 +287,7 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
                   retryAttempts: 3,
                   timeout: 15000
                 }}
-                gridCols={3}
+                columns={3}
                 cardSize={300}
                 className="p-4"
                 onLoadComplete={(stats) => console.log('Load completed:', stats)}
@@ -320,7 +320,7 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
           retryAttempts: 3,
           timeout: 15000
         }}
-        gridCols={3}
+        columns={3}
         cardSize={300}
         onLoadComplete={(stats) => console.log('Load completed:', stats)}
         onLoadError={(id, error) => console.error(`Load error for ${id}:`, error)}

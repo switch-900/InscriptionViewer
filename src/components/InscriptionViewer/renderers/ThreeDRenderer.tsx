@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Download, RotateCcw, ZoomIn, ZoomOut, Move3D } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import * as THREE from 'three';
+import { safeExtensionFormat } from '../../../utils/safeFormatting';
 
 interface ThreeDRendererProps {
   src: string;
@@ -148,13 +149,25 @@ export function ThreeDRenderer({
 
     for (const line of lines) {
       const parts = line.trim().split(/\s+/);
-      if (parts[0] === 'v') {
-        vertices.push(parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3]));
-      } else if (parts[0] === 'f') {
+      if (parts.length < 2) continue; // Skip invalid lines
+      
+      if (parts[0] === 'v' && parts.length >= 4) {
+        const x = parseFloat(parts[1]);
+        const y = parseFloat(parts[2]);
+        const z = parseFloat(parts[3]);
+        if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+          vertices.push(x, y, z);
+        }
+      } else if (parts[0] === 'f' && parts.length >= 4) {
         // Simple triangulation (assumes triangular faces)
         for (let i = 1; i < parts.length; i++) {
-          const vertexIndex = parseInt(parts[i].split('/')[0]) - 1;
-          faces.push(vertexIndex);
+          const vertexPart = parts[i].split('/');
+          if (vertexPart.length > 0 && vertexPart[0]) {
+            const vertexIndex = parseInt(vertexPart[0]) - 1;
+            if (!isNaN(vertexIndex) && vertexIndex >= 0) {
+              faces.push(vertexIndex);
+            }
+          }
         }
       }
     }
@@ -182,7 +195,14 @@ export function ThreeDRenderer({
       for (const line of lines) {
         if (line.trim().startsWith('vertex')) {
           const coords = line.trim().split(/\s+/).slice(1);
-          vertices.push(parseFloat(coords[0]), parseFloat(coords[1]), parseFloat(coords[2]));
+          if (coords.length >= 3) {
+            const x = parseFloat(coords[0]);
+            const y = parseFloat(coords[1]);
+            const z = parseFloat(coords[2]);
+            if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+              vertices.push(x, y, z);
+            }
+          }
         }
       }
 
@@ -329,7 +349,7 @@ export function ThreeDRenderer({
           <div className="text-2xl mb-2">🎮</div>
           <div className="text-sm">3D Model Viewer</div>
           <div className="text-xs mt-1 text-gray-400">
-            {fileExtension?.toUpperCase() || 'Unknown'} format
+            {safeExtensionFormat(fileExtension)} format
           </div>
           <div className="text-xs mt-2 text-red-500">
             Format not yet supported
@@ -356,7 +376,7 @@ export function ThreeDRenderer({
         <div className="flex justify-between items-center p-2 border-b bg-gray-50 dark:bg-gray-800">
           <div className="text-xs text-gray-600 dark:text-gray-400">
             <span className="font-mono">3D Model</span>
-            <span className="ml-2">{fileExtension?.toUpperCase()}</span>
+            <span className="ml-2">{safeExtensionFormat(fileExtension)}</span>
             {isLoading && <span className="ml-2 text-blue-500">Loading...</span>}
             {error && <span className="ml-2 text-red-500">Error</span>}
           </div>

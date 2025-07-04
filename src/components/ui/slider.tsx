@@ -21,10 +21,13 @@ export const Slider: React.FC<SliderProps> = ({
 }) => {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
-    onValueChange([newValue]);
+    if (!isNaN(newValue)) {
+      onValueChange([newValue]);
+    }
   }, [onValueChange]);
 
-  const percentage = ((value[0] - min) / (max - min)) * 100;
+  const currentValue = Array.isArray(value) && value.length > 0 ? value[0] : min;
+  const percentage = ((currentValue - min) / (max - min)) * 100;
 
   return (
     <div className={`relative w-full ${className}`}>
@@ -34,7 +37,7 @@ export const Slider: React.FC<SliderProps> = ({
           min={min}
           max={max}
           step={step}
-          value={value[0]}
+          value={currentValue}
           onChange={handleChange}
           disabled={disabled}
           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"

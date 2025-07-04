@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, ZoomIn, ZoomOut, RotateCw, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { safeMimeSubtype } from '../../../utils/safeFormatting';
 
 interface ImageRendererProps {
   src: string;
@@ -20,7 +21,7 @@ export function ImageRenderer({
   mimeType, 
   fileExtension,
   maxHeight = 400,
-  showControls = true 
+  showControls = false 
 }: ImageRendererProps) {
   const [zoom, setZoom] = React.useState(1);
   const [rotation, setRotation] = React.useState(0);
@@ -72,12 +73,12 @@ export function ImageRenderer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="w-full h-full flex flex-col">
       {/* Controls */}
       {showControls && imageLoaded && (
         <div className="flex justify-between items-center p-2 border-b bg-gray-50 dark:bg-gray-800">
           <div className="text-xs text-gray-600 dark:text-gray-400">
-            <span className="font-mono">{mimeType.split('/')[1]}</span>
+            <span className="font-mono">{safeMimeSubtype(mimeType)}</span>
             {imageDimensions && (
               <span className="ml-2">
                 {imageDimensions.width} × {imageDimensions.height}
@@ -141,23 +142,30 @@ export function ImageRenderer({
 
       {/* Image container */}
       <div 
-        className={`flex-1 overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-gray-800 ${
+        className={`flex-1 overflow-hidden relative ${
           isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''
         }`}
         style={{ 
-          maxHeight: isFullscreen ? '100vh' : maxHeight,
-          minHeight: isFullscreen ? '100vh' : '100px'
+          maxHeight: isFullscreen ? '100vh' : maxHeight - (showControls && imageLoaded ? 70 : 0),
+          minHeight: isFullscreen ? '100vh' : '100px',
+          width: '100%',
+          maxWidth: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
       >
         <img
           src={src}
           alt={alt}
-          className="w-full h-full object-contain transition-transform duration-200"
+          className="object-contain transition-transform duration-200"
           style={{
             transform: `scale(${zoom}) rotate(${rotation}deg)`,
             cursor: zoom > 1 ? 'move' : 'default',
             maxWidth: '100%',
-            maxHeight: '100%'
+            maxHeight: '100%',
+            width: 'auto',
+            height: 'auto'
           }}
           onLoad={handleImageLoad}
           onError={() => setImageError(true)}

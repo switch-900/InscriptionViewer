@@ -8,8 +8,8 @@ import { normalizeInscriptions } from '../../types/inscription';
 export const InscriptionViewer = React.memo(function InscriptionViewer({
   inscriptions,
   cardSize = 300,
-  showHeaders = true,
-  showControls = true,
+  showHeaders = false,
+  showControls = false,
   autoLoad = true,
   gridCols = 3,
   gap = 16,
@@ -70,7 +70,7 @@ export const InscriptionViewer = React.memo(function InscriptionViewer({
     }
 
     return (
-      <div key={key} className="inscription-card border rounded-lg overflow-hidden shadow-sm w-full h-full min-w-0 min-h-0 aspect-square">
+      <div key={key} className="inscription-card w-full h-full min-w-0 min-h-0 aspect-square">
         <InscriptionRenderer {...baseProps} className="w-full h-full" />
       </div>
     );

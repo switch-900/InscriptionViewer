@@ -18,7 +18,7 @@ export function HtmlRenderer({
   src,
   mimeType,
   maxHeight = 400,
-  showControls = true 
+  showControls = false 
 }: HtmlRendererProps) {
   const [showSource, setShowSource] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -79,7 +79,7 @@ export function HtmlRenderer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="w-full h-full flex flex-col">
       {/* Controls */}
       {showControls && (
         <div className="flex justify-between items-center p-2 border-b bg-gray-50 dark:bg-gray-800">
@@ -126,12 +126,17 @@ export function HtmlRenderer({
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      <div 
+        className="flex-1 overflow-hidden" 
+        style={{ 
+          maxHeight: maxHeight - (showControls ? 60 : 0),
+          minHeight: '200px'
+        }}
+      >
         {showSource && content ? (
           // Source view
           <pre 
             className="text-xs p-4 h-full overflow-auto font-mono whitespace-pre-wrap break-words bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
-            style={{ maxHeight }}
           >
             {content}
           </pre>
@@ -141,7 +146,6 @@ export function HtmlRenderer({
             ref={iframeRef}
             src={blobUrl || undefined}
             className="w-full h-full border-0"
-            style={{ maxHeight }}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
             title="HTML Content"
             onError={() => setError('Failed to load HTML content')}

@@ -62,15 +62,28 @@ export async function analyzeContent(url: string): Promise<ContentAnalysis> {
         console.log(`⚠️ Range not supported, falling back to full request for: ${url}`);
         response = await fetch(url);
       } else if (!response.ok) {
+        // For 404 and 400 errors, don't retry - these are permanent failures
+        if (response.status === 404 || response.status === 400) {
+          throw new Error(`PERMANENT_ERROR_${response.status}: ${response.statusText}`);
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-    } catch (rangeError) {
+    } catch (rangeError: any) {
+      // If it's a permanent error, don't retry
+      if (rangeError.message?.includes('PERMANENT_ERROR')) {
+        throw rangeError;
+      }
+      
       // Range request failed, try regular request
       console.log(`⚠️ Range request failed, trying full request for: ${url}`, rangeError);
       response = await fetch(url);
     }
 
     if (!response.ok) {
+      // For 404 and 400 errors, don't retry - these are permanent failures
+      if (response.status === 404 || response.status === 400) {
+        throw new Error(`PERMANENT_ERROR_${response.status}: ${response.statusText}`);
+      }
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 

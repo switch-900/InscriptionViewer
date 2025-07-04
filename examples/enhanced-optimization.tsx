@@ -257,9 +257,9 @@ export const EnhancedInscriptionExample: React.FC = () => {
           }}
           
           // Standard props
-          gridCols={3}
+          columns={3}
           cardSize={250}
-          showHeaders={true}
+          showIndex={true}
           showControls={true}
           enableModal={true}
           

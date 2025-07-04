@@ -16,7 +16,7 @@ export function JsonRenderer({
   content, 
   mimeType,
   maxHeight = 400,
-  showControls = true 
+  showControls = false 
 }: JsonRendererProps) {
   const [parsedJson, setParsedJson] = React.useState<any>(null);
   const [parseError, setParseError] = React.useState<string | null>(null);
@@ -197,7 +197,7 @@ export function JsonRenderer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="w-full h-full flex flex-col">
       {/* Controls */}
       {showControls && (
         <div className="flex justify-between items-center p-2 border-b bg-gray-50 dark:bg-gray-800">
@@ -239,14 +239,15 @@ export function JsonRenderer({
 
       {/* JSON content */}
       <div 
-        className="flex-1 overflow-auto p-4 font-mono text-sm w-full h-full"
+        className="flex-1 overflow-hidden p-4 font-mono text-sm w-full"
         style={{ 
           maxHeight: maxHeight - (showControls ? 60 : 0),
-          minHeight: '100px',
-          minWidth: '100%'
+          minHeight: '100px'
         }}
       >
-        {parsedJson && renderValue(parsedJson)}
+        <div className="w-full h-full overflow-auto">
+          {parsedJson && renderValue(parsedJson)}
+        </div>
       </div>
     </div>
   );

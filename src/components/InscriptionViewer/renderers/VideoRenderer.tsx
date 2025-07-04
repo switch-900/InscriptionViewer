@@ -2,6 +2,7 @@ import React from 'react';
 import { Play, Pause, VolumeX, Volume2, Download, Maximize2, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { safeMimeSubtype, safeFormatTime } from '../../../utils/safeFormatting';
 
 interface VideoRendererProps {
   src: string;
@@ -19,7 +20,7 @@ export function VideoRenderer({
   mimeType, 
   fileExtension,
   maxHeight = 400,
-  showControls = true 
+  showControls = false 
 }: VideoRendererProps) {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -76,21 +77,26 @@ export function VideoRenderer({
 
   const handleSeek = (value: number[]) => {
     const video = videoRef.current;
-    if (!video || !duration) return;
+    if (!video || !duration || !Array.isArray(value) || value.length === 0) return;
     
     const newTime = (value[0] / 100) * duration;
-    video.currentTime = newTime;
-    setCurrentTime(newTime);
+    if (!isNaN(newTime) && isFinite(newTime)) {
+      video.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
   };
 
   const handleVolumeChange = (value: number[]) => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !Array.isArray(value) || value.length === 0) return;
     
     const newVolume = value[0] / 100;
-    video.volume = newVolume;
-    setVolume(newVolume);
-    setIsMuted(newVolume === 0);
+    if (!isNaN(newVolume) && isFinite(newVolume)) {
+      const clampedVolume = Math.max(0, Math.min(1, newVolume));
+      video.volume = clampedVolume;
+      setVolume(clampedVolume);
+      setIsMuted(clampedVolume === 0);
+    }
   };
 
   const toggleMute = () => {
@@ -146,17 +152,6 @@ export function VideoRenderer({
     }
   };
 
-  const formatTime = (time: number) => {
-    const hours = Math.floor(time / 3600);
-    const minutes = Math.floor((time % 3600) / 60);
-    const seconds = Math.floor(time % 60);
-    
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
@@ -172,12 +167,12 @@ export function VideoRenderer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-black">
+    <div className="w-full h-full flex flex-col">
       {/* Info bar */}
       {showControls && isLoaded && (
         <div className="flex justify-between items-center p-2 bg-gray-900 text-white text-xs">
           <div>
-            <span className="font-mono">{mimeType.split('/')[1].toUpperCase()}</span>
+            <span className="font-mono">{safeMimeSubtype(mimeType)}</span>
             {videoDimensions && (
               <span className="ml-2">
                 {videoDimensions.width} × {videoDimensions.height}
@@ -201,10 +196,11 @@ export function VideoRenderer({
         <video
           ref={videoRef}
           src={src}
-          className="w-full h-full object-contain"
+          className="max-w-full max-h-full object-contain"
           style={{ 
-            maxHeight: maxHeight - (showControls ? 100 : 0),
-            maxWidth: '100%'
+            maxHeight: maxHeight - (showControls && isLoaded ? 140 : 0),
+            width: 'auto',
+            height: 'auto'
           }}
           onClick={togglePlay}
           onError={() => setError('Failed to load video')}
@@ -251,8 +247,8 @@ export function VideoRenderer({
                 className="w-full"
               />
               <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
+                <span>{safeFormatTime(currentTime)}</span>
+                <span>{safeFormatTime(duration)}</span>
               </div>
             </div>
           )}

@@ -44,10 +44,28 @@ function MyApp() {
 
 Visit our comprehensive documentation:
 
+- **[🎮 Live React Demo](https://switch-900.github.io/InscriptionViewer/)** - Interactive React demo with all features
 - **[📚 Complete Documentation](docs/index.html)** - Full integration guides and examples
 - **[⚡ Integration Guide](INTEGRATION-GUIDE.html)** - Quick setup and patterns
 - **[💰 LaserEyes Integration](LASEREYES-INTEGRATION.html)** - Wallet integration guide
-- **[🎮 Live Examples](api-examples.html)** - Interactive demos
+- **[🎮 Legacy Examples](api-examples.html)** - Static HTML demos
+
+## ⚠️ Important: Implementation Status (Updated Dec 2024)
+
+**For Production Use:** Please refer to our **[Working Features Only](test-pages/working-features-only.html)** page for accurate implementation details.
+
+Some of our examples show "aspirational" features that aren't fully implemented yet. We've now:
+
+- ✅ **Fixed all runtime errors** - No more `toUpperCase()` crashes or unsafe operations
+- ✅ **Added comprehensive error handling** - ErrorBoundary components throughout
+- ✅ **Created working-only examples** - [Working Features Only](test-pages/working-features-only.html) for production reference
+- ✅ **Added implementation status** - [Full status breakdown](IMPLEMENTATION-STATUS.md) explains what works vs. what's planned
+- ✅ **Enhanced safety** - All string operations, array access, and user inputs properly validated
+
+**Quick Reference:**
+- **[📋 Implementation Status](IMPLEMENTATION-STATUS.md)** - What works vs. what's planned
+- **[✅ Working Features Only](test-pages/working-features-only.html)** - Production examples
+- **[🧪 All Test Pages](test-pages/index.html)** - Full test suite
 
 ## 🔧 Core Components
 

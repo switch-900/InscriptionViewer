@@ -92,7 +92,7 @@ export function LazyInscriptionCard({
           className="w-full h-full"
         />
       ) : (
-        <div className="flex items-center justify-center w-full h-full bg-gray-100 rounded-lg aspect-square">
+        <div className="flex items-center justify-center w-full h-full aspect-square">
           <div className="text-gray-500">Loading...</div>
         </div>
       )}

@@ -5,3 +5,4 @@ export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 export { Slider } from './slider';
 export { ToastProvider, useToast } from './toast';
 export type { Toast } from './toast';
+export { ErrorBoundary, useErrorBoundary, withErrorBoundary } from './ErrorBoundary';

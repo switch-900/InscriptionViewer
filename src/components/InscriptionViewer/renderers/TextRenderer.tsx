@@ -18,7 +18,7 @@ export function TextRenderer({
   mimeType, 
   fileExtension, 
   maxHeight = 400,
-  showControls = true 
+  showControls = false 
 }: TextRendererProps) {
   const [copied, setCopied] = React.useState(false);
 
@@ -94,7 +94,7 @@ export function TextRenderer({
   }, [mimeType, fileExtension]);
 
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="w-full h-full flex flex-col">
       {/* Controls */}
       {showControls && (
         <div className="flex justify-between items-center p-2 border-b bg-gray-50 dark:bg-gray-800">
@@ -126,18 +126,19 @@ export function TextRenderer({
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-auto w-full h-full">
+      <div 
+        className="flex-1 overflow-hidden w-full" 
+        style={{
+          maxHeight: maxHeight - (showControls ? 70 : 0),
+          minHeight: '100px'
+        }}
+      >
         <pre 
           className={`text-xs p-4 w-full h-full overflow-auto font-mono whitespace-pre-wrap break-words ${
             isCode 
-              ? 'bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200' 
-              : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
+              ? 'text-gray-800 dark:text-gray-200' 
+              : 'text-gray-900 dark:text-gray-100'
           }`}
-          style={{ 
-            maxHeight: maxHeight - (showControls ? 60 : 0),
-            minHeight: '100px',
-            minWidth: '100%'
-          }}
         >
           {content}
         </pre>
