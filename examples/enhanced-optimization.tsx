@@ -5,7 +5,10 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EnhancedInscriptionViewer, LaserEyesWallet, useInscriptionCache } from '../src';
+import { InscriptionGallery } from '../src/components/InscriptionGallery';
+import { useServiceWorker } from '../src/services';
+import { useInscriptionCache } from '../src/hooks';
+import { LaserEyesWallet } from '../src/services/LaserEyesService';
 
 // Mock LaserEyes wallet implementation
 class MockLaserEyesWallet implements LaserEyesWallet {
@@ -224,50 +227,18 @@ export const EnhancedInscriptionExample: React.FC = () => {
       <div className="border rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Enhanced Gallery</h2>
         
-        <EnhancedInscriptionViewer
-          inscriptions={inscriptionIds}
-          
-          // Pre-fetched content
-          inscriptionContent={preFetchedContent}
-          
-          // Custom content fetcher (wallet integration)
-          contentFetcher={isConnected ? customContentFetcher : undefined}
-          
-          // Caching configuration
-          cacheConfig={{
-            enabled: optimizationsEnabled,
-            maxSize: 100,
-            ttl: 300000, // 5 minutes
-            strategy: 'lru'
-          }}
-          
-          // Performance options
-          performanceOptions={{
-            batchSize: 3,
-            lazyLoad: false,
-            preloadNext: 2,
-            enableOptimizations: optimizationsEnabled
-          }}
-          
-          // Fallback options
-          fallbackOptions={{
-            useAPI: true,
-            retryAttempts: 2,
-            timeout: 15000
-          }}
-          
-          // Standard props
+        <InscriptionGallery
+          inscriptionIds={inscriptionIds}
           columns={3}
           cardSize={250}
           showIndex={true}
           showControls={true}
           enableModal={true}
-          
-          // Callbacks
-          onLoadComplete={handleLoadComplete}
-          onLoadError={handleLoadError}
-          onCacheUpdate={handleCacheUpdate}
-          
+          performanceOptions={{
+            enableServiceWorker: optimizationsEnabled,
+            preloadNext: 2,
+            enableMemoryOptimization: optimizationsEnabled
+          }}
           className="enhanced-gallery"
         />
       </div>
@@ -349,29 +320,23 @@ export const EnhancedInscriptionExample: React.FC = () => {
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-3">📝 Usage Example</h3>
         <pre className="bg-gray-800 text-gray-100 p-4 rounded text-xs overflow-x-auto">
-{`import { EnhancedInscriptionViewer, useInscriptionCache } from 'bitcoin-inscription-viewer';
-import { useLaserEyes } from '@omnisat/lasereyes-react';
+{`import { InscriptionGallery, useServiceWorker, useInscriptionCache } from 'bitcoin-inscription-viewer';
 
 function MyApp() {
-  const { getInscriptionContent } = useLaserEyes();
+  const { isActive, clearCache, prefetchContent } = useServiceWorker();
+  const { getContent } = useInscriptionCache({ enabled: true });
   
   return (
-    <EnhancedInscriptionViewer
-      inscriptions={inscriptionIds}
-      contentFetcher={getInscriptionContent}
-      cacheConfig={{
-        enabled: true,
-        maxSize: 200,
-        ttl: 600000, // 10 minutes
-        strategy: 'lru'
-      }}
+    <InscriptionGallery
+      inscriptionIds={inscriptionIds}
+      columns={3}
+      cardSize={250}
+      showControls={true}
       performanceOptions={{
-        batchSize: 10,
-        lazyLoad: true,
+        enableServiceWorker: true,
         preloadNext: 5,
-        enableOptimizations: true
+        enableMemoryOptimization: true
       }}
-      onLoadComplete={(stats) => console.log('Performance:', stats)}
     />
   );
 }`}

@@ -21,6 +21,7 @@ Every example in this directory has been verified to work correctly with the cur
 ### Advanced Feature Examples
 - **`enhanced-optimization.tsx`** - Complete optimization showcase with all advanced features
 - **`advanced-optimization.tsx`** - Comprehensive optimization example (all features working)
+- **`service-worker-usage.tsx`** - Service worker caching and offline support demonstration
 
 ### Specialized Integration Examples
 - **`lasereyes-integration.tsx`** - LaserEyes wallet integration examples

@@ -37,7 +37,7 @@ export const SAMPLE_INSCRIPTIONS = [
     number: '8'
   },
   {
-    id: '1d7d15ab48fccf7011435584556ee9106be71f7073a857689594c143d7899333i0',
+    id: '45bcb818d139fa31a4fa57f21693af471abdd4cf9e48971c46e36e6f6d2b68cfi0',
     number: '9'
   },
   {

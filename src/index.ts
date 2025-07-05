@@ -1,6 +1,10 @@
 // Core components
-export { InscriptionViewer, InscriptionRenderer, InscriptionModal, LazyInscriptionCard, ApiExplorer, EnhancedInscriptionViewer } from './components/InscriptionViewer';
+export { InscriptionViewer, InscriptionRenderer, InscriptionModal, LazyInscriptionCard, ApiExplorer, EnhancedInscriptionViewer, analyzeContent, shouldLazyLoad } from './components/InscriptionViewer';
+
+// Individual renderers (for advanced usage)
+export { TextRenderer, ImageRenderer, VideoRenderer, AudioRenderer, JsonRenderer, HtmlRenderer, ThreeDRenderer, IframeRenderer, CodeRenderer, DownloadRenderer } from './components/InscriptionViewer/renderers';
 export { InscriptionGallery } from './components/InscriptionGallery';
+export { InscriptionExplorer } from './components/InscriptionExplorer';
 export { LaserEyesInscriptionGallery } from './components/LaserEyesInscriptionGallery';
 export { LiveDemo } from './components/LiveDemo';
 
@@ -19,7 +23,7 @@ export type { EnhancedInscriptionViewerProps, PreFetchedContent, PerformanceOpti
 
 // Services
 export { InscriptionContentCache, inscriptionCache, OrdinalsApiService, ordinalsApi, LaserEyesService, laserEyesService, swManager, useServiceWorker } from './services';
-export type { LaserEyesWallet, LaserEyesInscriptionContent } from './services';
+export type { LaserEyesWallet, LaserEyesInscriptionContent, ApiEndpoint, ApiResponse, InscriptionApiData, InscriptionsListResponse, BlockResponse, AddressResponse } from './services';
 
 // Hooks and their types
 export { useInscriptions, useInscription, useBlock, useInscriptionCache, useInscriptionPerformance, useVirtualScroll } from './hooks';

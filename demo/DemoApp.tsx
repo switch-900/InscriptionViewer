@@ -25,48 +25,186 @@ import type {
   InscriptionGalleryProps 
 } from '../src';
 
+// Import all examples
+import BasicUsageExample from '../examples/basic-usage';
+import AdvancedUsageExample from '../examples/advanced-usage';
+import ModalUsageExample from '../examples/modal-usage';
+import WalletInscriptionViewer from '../examples/wallet-integration';
+import { BasicLibraryExample, WalletIntegrationExample } from '../examples/library-usage';
+import InscriptionLibraryDemo from '../examples/library-demo';
+import LaserEyesWalletExample from '../examples/lasereyes-integration';
+import ApiIntegrationExample from '../examples/api-integration';
+import ServiceWorkerUsageExample from '../examples/service-worker-usage';
+import { AdvancedOptimizationExample } from '../examples/advanced-optimization';
+import { EnhancedInscriptionExample } from '../examples/enhanced-optimization';
+import ExamplesTestRunner from '../examples/ExamplesTestRunner';
+
 // Real, verified Bitcoin inscription IDs that work with ordinals.com
 const VERIFIED_INSCRIPTION_DATASET = [
   // Famous inscriptions that are guaranteed to exist
   '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0', // Bitcoin Whitepaper
   'b61b0172d95e266c18aea0c624db987e971a5d6d4ebc2aaed85da4642d635735i0', // First inscription
   '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0aei0', // Popular text
-  
-  // Additional verified inscriptions from sample data
-  'dca3da701a2607de6c89dd0bfe6106532dcefe279d13b105301a2d85eb4ffaafi0',
-  '0e50a465fc0ca415f3cb8a4aac1555b12a4bf3f33bc039f2a4d39f809e83af7ai0',
-  '934905624f847731e7f173ba70bfa3a1389b0a7fe2a4ffce8793eef2730b9ab9i0',
-  '50a42e51e6ce0ef76699f017a1017d7b5b6203e67d283c625ba7d1567b2e43bai0',
-  '65a78bdbc1e01ac02cda181a71304a8d82305bc2a24bf01e62bea4cfff3e2dd8i0',
-  '05ab6d843099fb30a1da1bbfe31117cb56466b3ba40a4b3f389cc37174d339b8i0',
-  '47825a32dd6e3de5fd7d97488d755e6d1005e5c8552b9ede5bc67900b074d09bi0',
-  '737552653d4424a523f8c652710d0f9416561ea67ee25242f8606b49fb428d9ai0',
-  '1d7d15ab48fccf7011435584556ee9106be71f7073a857689594c143d7899333i0',
-  '321e4f598ae0f4841af04d1a84f3abafa44802c7d35315ead91b32ffed0f400di0',
-  'eb1578eaca0a04eaf174296382fc5d77530f0feceb7747938b29c433c21d1afdi0',
-  '70d6136e949b5f07b6ac7d50aa9aea1fa6573e1b0e4f490170235ac74738bf5ai0',
-  'aab2c8514876fb81cb28f0f0516620cf189222e0ffc6fe6282863bb846955409i0',
-  'ef36dd247b98f12d19d15bab92ea7f8491b0766fb0b8074b7606614dbbab6c13i0',
-  'cec42963619240ede36fb03cd95d8fba883c9c1af72b1e2fc9746151a60729dci0',
-  '3124d086c59ce2205f52a108e21380e2c98b1ac6a21fc2f457fb5750317997d2i0'
-];
+     // JPEG image/jpeg
+    "d642ea0c994e35e912b90e9d49dcebebafcbebd574e37627c4fa86ce6eeef4fei0",
+    // MP4 video/mp4
+    "e45035fcdb3ba93cf56d6e3379b5dd1d60b16cbff44293caee6fc055c497ca3ai0",
+    // SVG image/svg+xml
+    "ad2a52669655f5f657b6aac7c7965d6992afc6856e200c4f3a8d46c1d5d119cfi0",
+    // MPEG audio/mpeg
+    "88ccc6fc79d23cce364a33a815800872d4e03f3004adf45e94cfce137a720816i0",
+    // GLTF model/gltf-binary
+    "672274cff8a6a5f4cbd2dcf6c99f838ef8cc097de1f449a9b912d6e7b2378269i0",
+    // HTML
+    "d3b049472e885b65ed0513a675c8e01a28fffe5eb8b347394168048390c8b14ci0",
+    // Js
+    "45bcb818d139fa31a4fa57f21693af471abdd4cf9e48971c46e36e6f6d2b68cfi0"
+  ];
 
 // Use verified dataset as the massive dataset to avoid 400 errors
 const MASSIVE_INSCRIPTION_DATASET = VERIFIED_INSCRIPTION_DATASET;
 
-// Generate additional IDs for massive dataset testing
-const generateAdditionalIds = (count: number): string[] => {
-  const additionalIds: string[] = [];
-  const chars = '0123456789abcdef';
-  
-  for (let i = 0; i < count; i++) {
-    let id = '';
-    for (let j = 0; j < 64; j++) {
-      id += chars[Math.floor(Math.random() * chars.length)];
+// Ordinals.com Latest Inscriptions Fetcher
+// Note: Due to CORS restrictions, you may need to use a proxy or backend service
+
+/**
+ * Fetches the latest inscription IDs from ordinals.com
+ * @param limit - Maximum number of inscriptions to return (optional)
+ * @returns Array of inscription IDs
+ */
+const fetchLatestInscriptions = async (limit = 50): Promise<string[]> => {
+  try {
+    // Option 1: Direct fetch (may be blocked by CORS)
+    const response = await fetch('https://ordinals.com/', {
+      method: 'GET',
+      headers: {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (compatible; InscriptionFetcher/1.0)',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    additionalIds.push(`${id}i0`);
+
+    const html = await response.text();
+    return parseInscriptionIds(html, limit);
+  } catch (error) {
+    console.error('Error fetching inscriptions:', error);
+    
+    // If CORS error, suggest using a proxy
+    if (error instanceof Error && (error.message.includes('CORS') || error.name === 'TypeError')) {
+      console.warn('CORS error detected. Consider using a proxy service or backend endpoint.');
+    }
+    
+    throw error;
   }
-  return additionalIds;
+};
+
+/**
+ * Alternative function using a CORS proxy (use with caution in production)
+ * @param limit - Maximum number of inscriptions to return
+ * @returns Array of inscription IDs
+ */
+const fetchLatestInscriptionsWithProxy = async (limit = 50): Promise<string[]> => {
+  try {
+    const proxyUrl = 'https://api.allorigins.win/get?url=';
+    const targetUrl = encodeURIComponent('https://ordinals.com/');
+    
+    const response = await fetch(proxyUrl + targetUrl);
+    const data = await response.json();
+    
+    return parseInscriptionIds(data.contents, limit);
+  } catch (error) {
+    console.error('Error fetching inscriptions with proxy:', error);
+    throw error;
+  }
+};
+
+/**
+ * Parses HTML content to extract inscription IDs
+ * @param html - HTML content from ordinals.com
+ * @param limit - Maximum number of inscriptions to return
+ * @returns Array of inscription IDs
+ */
+const parseInscriptionIds = (html: string, limit = 50): string[] => {
+  // Create a temporary DOM element to parse HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  // Find all links to inscriptions
+  const inscriptionLinks = doc.querySelectorAll('a[href^="/inscription/"]');
+  
+  const inscriptionIds: string[] = [];
+  
+  for (let i = 0; i < inscriptionLinks.length && i < limit; i++) {
+    const href = inscriptionLinks[i].getAttribute('href');
+    if (href) {
+      // Extract inscription ID from href: /inscription/[ID]
+      const id = href.replace('/inscription/', '');
+      inscriptionIds.push(id);
+    }
+  }
+  
+  // Remove duplicates (in case there are any)
+  return [...new Set(inscriptionIds)];
+};
+
+/**
+ * React hook for fetching inscriptions
+ * @param limit - Maximum number of inscriptions to return
+ * @param refreshInterval - Auto-refresh interval in milliseconds (optional)
+ * @returns { inscriptions, loading, error, refetch }
+ */
+const useLatestInscriptions = (limit = 50, refreshInterval: number | null = null) => {
+  const [inscriptions, setInscriptions] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchInscriptions = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Try direct fetch first, fallback to proxy if needed
+      let ids: string[];
+      try {
+        ids = await fetchLatestInscriptions(limit);
+      } catch (corsError) {
+        console.warn('Direct fetch failed, trying proxy...');
+        ids = await fetchLatestInscriptionsWithProxy(limit);
+      }
+      
+      setInscriptions(ids);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
+      console.error('Failed to fetch inscriptions:', err);
+      
+      // Fallback to verified dataset if fetch fails
+      console.warn('Using fallback verified dataset...');
+      setInscriptions(VERIFIED_INSCRIPTION_DATASET.slice(0, Math.min(limit, VERIFIED_INSCRIPTION_DATASET.length)));
+    } finally {
+      setLoading(false);
+    }
+  }, [limit]);
+
+  useEffect(() => {
+    fetchInscriptions();
+    
+    // Set up auto-refresh if interval is provided
+    if (refreshInterval) {
+      const interval = setInterval(fetchInscriptions, refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [fetchInscriptions, refreshInterval]);
+
+  return {
+    inscriptions,
+    loading,
+    error,
+    refetch: fetchInscriptions
+  };
 };
 
 // Performance monitoring component
@@ -216,6 +354,8 @@ const ControlPanel: React.FC<{
   onCacheChange: (enabled: boolean) => void;
   onClearCache: () => void;
   onStressTest: () => void;
+  onRefreshInscriptions: () => void;
+  fetchingInscriptions: boolean;
 }> = ({
   columns,
   cardSize,
@@ -230,7 +370,9 @@ const ControlPanel: React.FC<{
   onVirtualScrollingChange,
   onCacheChange,
   onClearCache,
-  onStressTest
+  onStressTest,
+  onRefreshInscriptions,
+  fetchingInscriptions
 }) => {
   return (
     <Card className="bg-gradient-to-br from-purple-900/60 to-purple-800/60 border-purple-600/40 backdrop-blur-sm">
@@ -317,7 +459,7 @@ const ControlPanel: React.FC<{
         {/* Feature Toggles */}
         <div className="space-y-4">
           <h3 className="text-purple-200 font-semibold">Advanced Features</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Button
               variant={virtualScrolling ? "default" : "outline"}
               size="sm"
@@ -339,6 +481,15 @@ const ControlPanel: React.FC<{
               }
             >
               💾 Cache
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefreshInscriptions}
+              disabled={fetchingInscriptions}
+              className="border-cyan-600 text-cyan-300 hover:bg-cyan-800/50 disabled:opacity-50"
+            >
+              {fetchingInscriptions ? '🔄 Fetching...' : '🔄 Refresh Data'}
             </Button>
             <Button
               variant="outline"
@@ -374,7 +525,7 @@ const DemoApp: React.FC = () => {
   const [enableCache, setEnableCache] = useState(true);
   const [isStressTesting, setIsStressTesting] = useState(false);
   const [selectedInscription, setSelectedInscription] = useState<InscriptionData | null>(null);
-  const [activeDemo, setActiveDemo] = useState<'gallery' | 'viewer' | 'api'>('gallery');
+  const [activeDemo, setActiveDemo] = useState<'gallery' | 'viewer' | 'api' | 'basic' | 'advanced' | 'modal' | 'wallet' | 'library' | 'lasereyes' | 'service-worker' | 'optimization' | 'enhanced' | 'test-runner'>('gallery');
 
   // Performance monitoring
   const { 
@@ -390,28 +541,116 @@ const DemoApp: React.FC = () => {
     enabled: enableCache
   });
 
-  // Generate dataset
+  // State for real inscription fetching
+  const [fetchedInscriptions, setFetchedInscriptions] = useState<string[]>([]);
+  const [fetchingInscriptions, setFetchingInscriptions] = useState(false);
+  
+  // Fetch real inscriptions on mount
+  useEffect(() => {
+    const fetchRealInscriptions = async () => {
+      if (fetchedInscriptions.length === 0) {
+        setFetchingInscriptions(true);
+        try {
+          // Try to fetch real inscriptions
+          let realIds: string[];
+          try {
+            realIds = await fetchLatestInscriptions(500); // Fetch more for dataset variety
+          } catch (corsError) {
+            console.warn('Direct fetch failed, trying proxy...');
+            realIds = await fetchLatestInscriptionsWithProxy(500);
+          }
+          
+          if (realIds.length > 0) {
+            setFetchedInscriptions(realIds);
+            console.log(`Successfully fetched ${realIds.length} real inscriptions`);
+          }
+        } catch (error) {
+          console.warn('Failed to fetch real inscriptions, using verified dataset:', error);
+        } finally {
+          setFetchingInscriptions(false);
+        }
+      }
+    };
+
+    fetchRealInscriptions();
+  }, []);
+
+  // Generate dataset using real inscriptions when available
   const inscriptionDataset = useMemo(() => {
-    const baseIds = [...MASSIVE_INSCRIPTION_DATASET];
-    const additionalCount = Math.max(0, datasetSize - baseIds.length);
-    const additionalIds = generateAdditionalIds(additionalCount);
-    return [...baseIds, ...additionalIds].slice(0, datasetSize);
-  }, [datasetSize]);
+    // Use fetched inscriptions if available, otherwise fall back to verified dataset
+    const availableIds = fetchedInscriptions.length > 0 ? fetchedInscriptions : MASSIVE_INSCRIPTION_DATASET;
+    
+    if (datasetSize <= availableIds.length) {
+      return availableIds.slice(0, datasetSize);
+    } else {
+      // If we need more than available, repeat the dataset to reach desired size
+      const repeated: string[] = [];
+      while (repeated.length < datasetSize) {
+        const remaining = datasetSize - repeated.length;
+        repeated.push(...availableIds.slice(0, Math.min(remaining, availableIds.length)));
+      }
+      return repeated;
+    }
+  }, [datasetSize, fetchedInscriptions]);
+
+  // Refresh inscriptions function
+  const refreshInscriptions = useCallback(async () => {
+    setFetchingInscriptions(true);
+    try {
+      // Clear existing inscriptions first
+      setFetchedInscriptions([]);
+      
+      // Try to fetch fresh real inscriptions
+      let realIds: string[];
+      try {
+        realIds = await fetchLatestInscriptions(500);
+      } catch (corsError) {
+        console.warn('Direct fetch failed, trying proxy...');
+        realIds = await fetchLatestInscriptionsWithProxy(500);
+      }
+      
+      if (realIds.length > 0) {
+        setFetchedInscriptions(realIds);
+        console.log(`Successfully refreshed with ${realIds.length} real inscriptions`);
+      }
+    } catch (error) {
+      console.warn('Failed to refresh inscriptions:', error);
+    } finally {
+      setFetchingInscriptions(false);
+    }
+  }, []);
 
   // Stress test function
   const runStressTest = useCallback(async () => {
     setIsStressTesting(true);
-    const stressDataset = generateAdditionalIds(1000);
     
-    // Simulate intensive loading
-    const startTime = performance.now();
-    for (let i = 0; i < stressDataset.length; i += 50) {
-      await new Promise(resolve => setTimeout(resolve, 10));
+    try {
+      // Try to fetch fresh inscriptions for stress testing
+      console.log('Starting stress test with real inscription fetching...');
+      const stressDataset = await fetchLatestInscriptionsWithProxy(1000);
+      
+      // Simulate intensive loading
+      const startTime = performance.now();
+      for (let i = 0; i < stressDataset.length; i += 50) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      const endTime = performance.now();
+      
+      console.log(`Stress test completed in ${endTime - startTime}ms with ${stressDataset.length} real inscriptions`);
+    } catch (error) {
+      console.warn('Stress test with real inscriptions failed, using fallback:', error);
+      
+      // Fallback to basic stress test
+      const startTime = performance.now();
+      for (let i = 0; i < 1000; i += 50) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      const endTime = performance.now();
+      
+      console.log(`Fallback stress test completed in ${endTime - startTime}ms`);
+    } finally {
+      setIsStressTesting(false);
     }
-    const endTime = performance.now();
-    
-    console.log(`Stress test completed in ${endTime - startTime}ms`);
-    setIsStressTesting(false);
   }, []);
 
   // Gallery props with enhanced virtual scrolling support
@@ -439,7 +678,7 @@ const DemoApp: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950">
+      <div className="min-h-screen bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 scrollbar-hide">
         {/* Header */}
         <header className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 backdrop-blur-sm border-b border-purple-700/50 sticky top-0 z-50">
           <div className="container mx-auto px-6 py-4">
@@ -452,7 +691,7 @@ const DemoApp: React.FC = () => {
                   Advanced React Library Demo - Production Ready with Virtual Scrolling & Performance Monitoring
                 </p>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant={activeDemo === 'gallery' ? 'default' : 'outline'}
                   onClick={() => setActiveDemo('gallery')}
@@ -460,8 +699,9 @@ const DemoApp: React.FC = () => {
                     ? "bg-purple-600 hover:bg-purple-700" 
                     : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
                   }
+                  size="sm"
                 >
-                  Gallery Demo
+                  🏛️ Gallery
                 </Button>
                 <Button
                   variant={activeDemo === 'viewer' ? 'default' : 'outline'}
@@ -470,8 +710,9 @@ const DemoApp: React.FC = () => {
                     ? "bg-purple-600 hover:bg-purple-700" 
                     : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
                   }
+                  size="sm"
                 >
-                  Enhanced Viewer
+                  ⚡ Enhanced
                 </Button>
                 <Button
                   variant={activeDemo === 'api' ? 'default' : 'outline'}
@@ -480,8 +721,108 @@ const DemoApp: React.FC = () => {
                     ? "bg-purple-600 hover:bg-purple-700" 
                     : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
                   }
+                  size="sm"
                 >
-                  API Explorer
+                  🌐 API
+                </Button>
+                <Button
+                  variant={activeDemo === 'basic' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('basic')}
+                  className={activeDemo === 'basic' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  🚀 Basic
+                </Button>
+                <Button
+                  variant={activeDemo === 'advanced' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('advanced')}
+                  className={activeDemo === 'advanced' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  ⚙️ Advanced
+                </Button>
+                <Button
+                  variant={activeDemo === 'modal' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('modal')}
+                  className={activeDemo === 'modal' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  🖼️ Modal
+                </Button>
+                <Button
+                  variant={activeDemo === 'wallet' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('wallet')}
+                  className={activeDemo === 'wallet' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  👛 Wallet
+                </Button>
+                <Button
+                  variant={activeDemo === 'library' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('library')}
+                  className={activeDemo === 'library' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  📚 Library
+                </Button>
+                <Button
+                  variant={activeDemo === 'lasereyes' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('lasereyes')}
+                  className={activeDemo === 'lasereyes' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  🔥 LaserEyes
+                </Button>
+                <Button
+                  variant={activeDemo === 'service-worker' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('service-worker')}
+                  className={activeDemo === 'service-worker' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  📦 SW
+                </Button>
+                <Button
+                  variant={activeDemo === 'optimization' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('optimization')}
+                  className={activeDemo === 'optimization' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  🔧 Optimization
+                </Button>
+                <Button
+                  variant={activeDemo === 'test-runner' ? 'default' : 'outline'}
+                  onClick={() => setActiveDemo('test-runner')}
+                  className={activeDemo === 'test-runner' 
+                    ? "bg-purple-600 hover:bg-purple-700" 
+                    : "border-purple-600 text-purple-300 hover:bg-purple-800/50"
+                  }
+                  size="sm"
+                >
+                  🧪 Tests
                 </Button>
               </div>
             </div>
@@ -489,7 +830,7 @@ const DemoApp: React.FC = () => {
         </header>
 
         {/* Main Content */}
-        <main className="container mx-auto px-6 py-8 space-y-8">
+        <main className="container mx-auto px-6 py-8 space-y-8 scrollbar-hide">
           {/* Performance Monitor */}
           <PerformanceMonitor 
             metrics={metrics} 
@@ -514,6 +855,8 @@ const DemoApp: React.FC = () => {
               onCacheChange={setEnableCache}
               onClearCache={clearCache}
               onStressTest={runStressTest}
+              onRefreshInscriptions={refreshInscriptions}
+              fetchingInscriptions={fetchingInscriptions}
             />
           )}
 
@@ -526,6 +869,16 @@ const DemoApp: React.FC = () => {
                   <Badge className="ml-2 bg-green-600 text-white">
                     {inscriptionDataset.length} Inscriptions
                   </Badge>
+                  {fetchingInscriptions && (
+                    <Badge className="ml-2 bg-orange-600 text-white animate-pulse">
+                      🔄 Fetching Real Inscriptions...
+                    </Badge>
+                  )}
+                  {fetchedInscriptions.length > 0 && !fetchingInscriptions && (
+                    <Badge className="ml-2 bg-emerald-600 text-white">
+                      ✅ Using {fetchedInscriptions.length} Real Inscriptions
+                    </Badge>
+                  )}
                   {virtualScrolling && (
                     <Badge className="ml-2 bg-blue-600 text-white">
                       🚀 Virtual Scrolling
@@ -542,6 +895,7 @@ const DemoApp: React.FC = () => {
                     🚀 <strong>Performance Optimizations Active:</strong>
                   </p>
                   <ul className="list-disc list-inside space-y-1 text-purple-300">
+                    <li><strong>Real Inscription Data:</strong> {fetchedInscriptions.length > 0 ? `✅ Using ${fetchedInscriptions.length} real inscriptions from ordinals.com` : '📝 Using verified fallback dataset'}</li>
                     <li><strong>Batch Loading:</strong> {batchSize} items per batch with 10 concurrent requests</li>
                     <li><strong>Virtual Scrolling:</strong> {virtualScrolling ? '✅ Enabled' : '❌ Disabled'} - Only renders visible items</li>
                     <li><strong>Aggressive Prefetching:</strong> 50 items ahead for smooth scrolling</li>
@@ -583,56 +937,8 @@ const DemoApp: React.FC = () => {
                     enableOfflineMode: true,
                     retryAttempts: 3
                   }}
-                  className="w-full h-[600px]"
+                  className="w-full h-[600px] scrollbar-hide"
                 />
-              </CardContent>
-            </Card>
-          )}
-
-          {activeDemo === 'api' && (
-            <Card className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border-purple-600/30 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-purple-100 text-xl font-bold">
-                  🔗 API Stress Test
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="text-purple-200">
-                  <p className="mb-4">
-                    Testing API performance with batch fetching, caching, and error handling.
-                    This demo fetches multiple inscriptions simultaneously to showcase the library's 
-                    performance optimization features.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-4 bg-purple-800/30 rounded-lg">
-                      <div className="text-2xl font-bold text-green-400">
-                        {Math.round((stats.hitRate || 0) * 100)}%
-                      </div>
-                      <div className="text-sm text-purple-300">Cache Hit Rate</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-800/30 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-400">
-                        {metrics.totalRequests || 0}
-                      </div>
-                      <div className="text-sm text-purple-300">Items Processed</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-800/30 rounded-lg">
-                      <div className="text-2xl font-bold text-yellow-400">
-                        {metrics.averageLoadTime ? Math.round(metrics.averageLoadTime) : 0}ms
-                      </div>
-                      <div className="text-sm text-purple-300">Avg Load Time</div>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={runStressTest}
-                    disabled={isStressTesting}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3"
-                  >
-                    {isStressTesting ? '⚡ Running Stress Test...' : '🚀 Start API Stress Test'}
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           )}
@@ -722,11 +1028,149 @@ const DemoApp: React.FC = () => {
                       ttl: 300000,
                       strategy: 'lru'
                     }}
-                    className="w-full h-96"
+                    className="w-full h-96 scrollbar-hide"
                   />
                 </div>
               </DialogContent>
             </Dialog>
+          )}
+
+          {activeDemo === 'basic' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">🚀 Basic Usage Examples</h2>
+                <p className="text-purple-300 mt-2">Simple inscription viewing with different data formats</p>
+              </div>
+              <div className="p-6">
+                <BasicUsageExample />
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'advanced' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">⚙️ Advanced Usage Examples</h2>
+                <p className="text-purple-300 mt-2">Interactive controls and advanced configuration options</p>
+              </div>
+              <div className="p-6">
+                <AdvancedUsageExample />
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'modal' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">🖼️ Modal Usage Examples</h2>
+                <p className="text-purple-300 mt-2">Different modal configurations and triggers</p>
+              </div>
+              <div className="p-6">
+                <ModalUsageExample />
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'wallet' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">👛 Wallet Integration Examples</h2>
+                <p className="text-purple-300 mt-2">Simple wallet integration patterns</p>
+              </div>
+              <div className="p-6">
+                <WalletInscriptionViewer />
+                <div className="mt-8">
+                  <h3 className="text-purple-200 text-lg font-semibold mb-4">📚 Advanced Wallet Integration</h3>
+                  <WalletIntegrationExample />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'library' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">📚 Library Usage Examples</h2>
+                <p className="text-purple-300 mt-2">Complete library usage patterns and best practices</p>
+              </div>
+              <div className="p-6">
+                <BasicLibraryExample />
+                <div className="mt-8">
+                  <h3 className="text-purple-200 text-lg font-semibold mb-4">🎨 Complete Library Demo</h3>
+                  <InscriptionLibraryDemo />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'lasereyes' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">🔥 LaserEyes Integration</h2>
+                <p className="text-purple-300 mt-2">LaserEyes wallet integration examples</p>
+              </div>
+              <div className="p-6">
+                <LaserEyesWalletExample />
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'service-worker' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">📦 Service Worker & Caching</h2>
+                <p className="text-purple-300 mt-2">Service worker caching and offline support demonstration</p>
+              </div>
+              <div className="p-6">
+                <ServiceWorkerUsageExample />
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'optimization' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">🔧 Advanced Optimization</h2>
+                <p className="text-purple-300 mt-2">Complete optimization showcase with all advanced features</p>
+              </div>
+              <div className="p-6">
+                <AdvancedOptimizationExample 
+                  inscriptionIds={VERIFIED_INSCRIPTION_DATASET}
+                  enableVirtualScrolling={false}
+                  enableServiceWorker={true}
+                  enableBatchFetching={true}
+                />
+                <div className="mt-8">
+                  <h3 className="text-purple-200 text-lg font-semibold mb-4">⚡ Enhanced Optimization</h3>
+                  <EnhancedInscriptionExample />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeDemo === 'test-runner' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">🧪 Examples Test Runner</h2>
+                <p className="text-purple-300 mt-2">Interactive test runner for all examples</p>
+              </div>
+              <div className="p-6">
+                <ExamplesTestRunner />
+              </div>
+            </div>
+          )}
+
+          {/* API Integration goes here when that tab is selected */}
+          {activeDemo === 'api' && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 border border-purple-600/30 backdrop-blur-sm rounded-lg">
+              <div className="p-6 border-b border-purple-600/30">
+                <h2 className="text-purple-100 text-xl font-bold">🌐 API Integration Examples</h2>
+                <p className="text-purple-300 mt-2">Comprehensive API integration demonstrations</p>
+              </div>
+              <div className="p-6">
+                <ApiIntegrationExample />
+              </div>
+            </div>
           )}
         </main>
 

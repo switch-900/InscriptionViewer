@@ -136,7 +136,11 @@ export function HtmlRenderer({
         {showSource && content ? (
           // Source view
           <pre 
-            className="text-xs p-4 h-full overflow-auto font-mono whitespace-pre-wrap break-words bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+            className="text-xs p-4 h-full overflow-auto font-mono whitespace-pre-wrap break-words bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none', /* Firefox */
+              msOverflowStyle: 'none', /* IE and Edge */
+            }}
           >
             {content}
           </pre>

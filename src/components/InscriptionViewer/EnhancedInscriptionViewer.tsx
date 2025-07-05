@@ -117,11 +117,11 @@ export const EnhancedInscriptionViewer: React.FC<EnhancedInscriptionViewerProps>
 
   // Initialize batch fetcher
   const { fetchBatch, getActiveRequests, getQueueSize } = useBatchFetcher({
-    batchSize: performanceOptions.batchSize || 10,
-    maxConcurrency: 5,
-    retryAttempts: fallbackOptions.retryAttempts || 3,
-    retryDelay: fallbackOptions.retryDelay || 1000,
-    timeout: fallbackOptions.timeout || 10000
+    batchSize: performanceOptions.batchSize || 3,
+    maxConcurrency: 1,
+    retryAttempts: fallbackOptions.retryAttempts || 1,
+    retryDelay: fallbackOptions.retryDelay || 3000,
+    timeout: fallbackOptions.timeout || 15000
   });
 
   // Initialize API service
@@ -302,7 +302,7 @@ export const EnhancedInscriptionViewer: React.FC<EnhancedInscriptionViewerProps>
     batchFetching: performanceOptions.enableOptimizations ? {
       enabled: true,
       batchSize: performanceOptions.batchSize || 10,
-      maxConcurrency: 5
+      maxConcurrency: 2
     } : undefined,
     // Performance options
     performanceOptions: {

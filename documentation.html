@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Inscription Viewer - Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #e2e8f0;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 0.5rem;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1.5rem;
+            background: rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            text-decoration: none;
+            border-radius: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(139, 92, 246, 0.4);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .section {
+            display: none;
+            background: rgba(30, 27, 59, 0.6);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #c084fc;
+        }
+
+        .section h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem 0;
+            color: #a855f7;
+        }
+
+        .code-block {
+            background: #1e1b3b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(139, 92, 246, 0.3);
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            color: #c084fc;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(139, 92, 246, 0.5);
+            color: white;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .feature-card h4 {
+            color: #a855f7;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-card p {
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card .status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .props-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(30, 27, 59, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .props-table th,
+        .props-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .props-table th {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            font-weight: 600;
+        }
+
+        .props-table code {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .install-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .install-step {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            text-align: center;
+        }
+
+        .install-step .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #8b5cf6;
+            color: white;
+            border-radius: 50%;
+            line-height: 40px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            opacity: 0.7;
+        }
+
+        .footer a {
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: #c084fc;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🪙 Bitcoin Inscription Viewer</h1>
+            <p>A modern React library for displaying Bitcoin inscriptions with advanced features</p>
+            <div>
+                <span class="badge">✅ Production Ready</span>
+                <span class="badge">🚀 Optimized</span>
+                <span class="badge">📱 Responsive</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-item active" onclick="showSection('installation')">Installation</div>
+            <div class="nav-item" onclick="showSection('quick-start')">Quick Start</div>
+            <div class="nav-item" onclick="showSection('components')">Components</div>
+            <div class="nav-item" onclick="showSection('hooks')">Hooks</div>
+            <div class="nav-item" onclick="showSection('advanced')">Advanced</div>
+            <div class="nav-item" onclick="showSection('examples')">Examples</div>
+        </nav>
+
+        <!-- Installation Section -->
+        <section id="installation" class="section active">
+            <h2>📦 Installation</h2>
+            <p>Get started with Bitcoin Inscription Viewer in your React project:</p>
+
+            <div class="install-steps">
+                <div class="install-step">
+                    <div class="step-number">1</div>
+                    <h4>Install Package</h4>
+                    <div class="code-block">
+                        <pre>npm install bitcoin-inscription-viewer</pre>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                </div>
+                
+                <div class="install-step">
+                    <div class="step-number">2</div>
+                    <h4>Import Components</h4>
+                    <div class="code-block">
+                        <pre>import { InscriptionGallery } from 'bitcoin-inscription-viewer';</pre>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                </div>
+                
+                <div class="install-step">
+                    <div class="step-number">3</div>
+                    <h4>Use in Your App</h4>
+                    <div class="code-block">
+                        <pre>&lt;InscriptionGallery inscriptionIds={ids} /&gt;</pre>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Alternative Installation Methods</h3>
+            <div class="code-block">
+                <pre># Using Yarn
+yarn add bitcoin-inscription-viewer
+
+# Using pnpm
+pnpm add bitcoin-inscription-viewer</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </section>
+
+        <!-- Quick Start Section -->
+        <section id="quick-start" class="section">
+            <h2>🚀 Quick Start</h2>
+            <p>Get up and running in minutes with these simple examples:</p>
+
+            <h3>Basic Gallery</h3>
+            <div class="code-block">
+                <pre>import React from 'react';
+import { InscriptionGallery } from 'bitcoin-inscription-viewer';
+
+function App() {
+  const inscriptionIds = [
+    'dca3da701a2607de6c89dd0bfe6106532dcefe279d13b105301a2d85eb4ffaafi0',
+    '0e50a465fc0ca415f3cb8a4aac1555b12a4bf3f33bc039f2a4d39f809e83af7ai0',
+    '934905624f847731e7f173ba70bfa3a1389b0a7fe2a4ffce8793eef2730b9ab9i0'
+  ];
+
+  return (
+    &lt;InscriptionGallery
+      inscriptionIds={inscriptionIds}
+      columns={3}
+      cardSize={200}
+      showIndex={true}
+      enableModal={true}
+    /&gt;
+  );
+}</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <h3>Enhanced Gallery with Advanced Features</h3>
+            <div class="code-block">
+                <pre>import React from 'react';
+import { EnhancedInscriptionViewer } from 'bitcoin-inscription-viewer';
+
+function AdvancedApp() {
+  const inscriptionIds = [
+    // Array of inscription IDs...
+  ];
+
+  return (
+    &lt;EnhancedInscriptionViewer
+      inscriptions={inscriptionIds}
+      enableVirtualScrolling={true}
+      performanceOptions={{
+        enableMemoryOptimization: true,
+        preloadNext: 5,
+        enableServiceWorker: false
+      }}
+      cacheConfig={{
+        enabled: true,
+        strategy: 'lru',
+        maxSize: 1000,
+        ttl: 30 * 60 * 1000 // 30 minutes
+      }}
+      batchFetching={{
+        enabled: true,
+        batchSize: 50,
+        batchDelay: 100
+      }}
+    /&gt;
+  );
+}</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </section>
+
+        <!-- Components Section -->
+        <section id="components" class="section">
+            <h2>🧩 Components</h2>
+            <p>All available components with their current status and usage:</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>InscriptionGallery</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Display multiple inscriptions in a responsive grid layout with customizable columns and card sizes.</p>
+                    <div class="code-block">
+                        <pre>&lt;InscriptionGallery
+  inscriptionIds={ids}
+  columns={3}
+  cardSize={200}
+  showIndex={true}
+  enableModal={true}
+/&gt;</pre>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4>EnhancedInscriptionViewer</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Advanced viewer with virtual scrolling, performance monitoring, caching, and batch fetching.</p>
+                    <div class="code-block">
+                        <pre>&lt;EnhancedInscriptionViewer
+  inscriptions={inscriptions}
+  enableVirtualScrolling={true}
+  cacheConfig={{ enabled: true }}
+/&gt;</pre>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4>InscriptionViewer</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Basic single inscription viewer with modal support.</p>
+                    <div class="code-block">
+                        <pre>&lt;InscriptionViewer
+  inscriptions={inscriptionIds}
+  enableModal={true}
+  showHeaders={true}
+/&gt;</pre>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4>InscriptionModal</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Modal dialog for detailed inscription viewing.</p>
+                    <div class="code-block">
+                        <pre>&lt;InscriptionModal
+  inscriptionId="inscription-id"
+  trigger={&lt;button&gt;View&lt;/button&gt;}
+  modalSize="lg"
+/&gt;</pre>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4>LaserEyesInscriptionGallery</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Wallet-integrated gallery using LaserEyes for content fetching.</p>
+                    <div class="code-block">
+                        <pre>&lt;LaserEyesInscriptionGallery
+  wallet={laserEyesWallet}
+  columns={4}
+  cardSize={180}
+/&gt;</pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Component Props Reference</h3>
+            
+            <h4>InscriptionGallery Props</h4>
+            <table class="props-table">
+                <thead>
+                    <tr>
+                        <th>Prop</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>inscriptionIds</code></td>
+                        <td><code>string[]</code></td>
+                        <td>Required</td>
+                        <td>Array of inscription IDs to display</td>
+                    </tr>
+                    <tr>
+                        <td><code>columns</code></td>
+                        <td><code>1-6</code></td>
+                        <td><code>3</code></td>
+                        <td>Number of grid columns</td>
+                    </tr>
+                    <tr>
+                        <td><code>cardSize</code></td>
+                        <td><code>number</code></td>
+                        <td><code>200</code></td>
+                        <td>Card size in pixels</td>
+                    </tr>
+                    <tr>
+                        <td><code>showIndex</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>false</code></td>
+                        <td>Show inscription numbers</td>
+                    </tr>
+                    <tr>
+                        <td><code>enableModal</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>false</code></td>
+                        <td>Enable modal view on click</td>
+                    </tr>
+                    <tr>
+                        <td><code>showControls</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>false</code></td>
+                        <td>Show content controls</td>
+                    </tr>
+                    <tr>
+                        <td><code>enableVirtualScrolling</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>false</code></td>
+                        <td>Enable virtual scrolling for large datasets</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Hooks Section -->
+        <section id="hooks" class="section">
+            <h2>🪝 React Hooks</h2>
+            <p>Advanced hooks for performance monitoring, caching, and data management:</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>useInscriptionPerformance</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Real-time performance monitoring for load times and cache efficiency.</p>
+                    <div class="code-block">
+                        <pre>const {
+  metrics,
+  recordLoadStart,
+  recordLoadComplete,
+  recordCacheHit,
+  recordCacheMiss
+} = useInscriptionPerformance();</pre>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4>useInscriptionCache</h4>
+                    <span class="status">✅ Working</span>
+                    <p>LRU cache with TTL for efficient content management.</p>
+                    <div class="code-block">
+                        <pre>const {
+  getContent,
+  preloadContent,
+  clearCache,
+  stats,
+  isInCache
+} = useInscriptionCache({
+  enabled: true,
+  strategy: 'lru',
+  maxSize: 1000,
+  ttl: 30 * 60 * 1000
+});</pre>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4>useVirtualScroll</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Virtual scrolling for handling large datasets efficiently.</p>
+                    <div class="code-block">
+                        <pre>const {
+  visibleItems,
+  totalHeight,
+  onScroll,
+  containerRef,
+  currentRange,
+  prefetchRange
+} = useVirtualScroll(items, {
+  itemHeight: 220,
+  containerHeight: 800,
+  overscan: 15
+});</pre>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4>useBatchFetcher</h4>
+                    <span class="status">✅ Working</span>
+                    <p>Batch request management with queue and retry logic.</p>
+                    <div class="code-block">
+                        <pre>const {
+  fetchBatch,
+  getActiveRequests,
+  getQueueSize
+} = useBatchFetcher({
+  batchSize: 50,
+  maxConcurrency: 10,
+  retryAttempts: 3
+});</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Section -->
+        <section id="advanced" class="section">
+            <h2>⚡ Advanced Features</h2>
+            <p>Advanced configuration and optimization techniques:</p>
+
+            <h3>Virtual Scrolling for Large Datasets</h3>
+            <div class="code-block">
+                <pre>import { EnhancedInscriptionViewer } from 'bitcoin-inscription-viewer';
+
+// Handle 1000+ inscriptions efficiently
+const massiveDataset = Array.from({ length: 1000 }, (_, i) => 
+  `inscription-id-${i}`
+);
+
+&lt;EnhancedInscriptionViewer
+  inscriptions={massiveDataset}
+  enableVirtualScrolling={true}
+  performanceOptions={{
+    enableMemoryOptimization: true,
+    preloadNext: 10
+  }}
+  batchFetching={{
+    enabled: true,
+    batchSize: 100,
+    batchDelay: 50
+  }}
+/&gt;</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <h3>Performance Monitoring Dashboard</h3>
+            <div class="code-block">
+                <pre>import { useInscriptionPerformance } from 'bitcoin-inscription-viewer';
+
+function PerformanceMonitor() {
+  const { metrics } = useInscriptionPerformance();
+
+  return (
+    &lt;div&gt;
+      &lt;h3&gt;Performance Metrics&lt;/h3&gt;
+      &lt;p&gt;Avg Load Time: {metrics.averageLoadTime}ms&lt;/p&gt;
+      &lt;p&gt;Cache Hit Rate: {(metrics.cacheHitRate * 100).toFixed(1)}%&lt;/p&gt;
+      &lt;p&gt;Total Requests: {metrics.totalRequests}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <h3>Custom Content Fetcher</h3>
+            <div class="code-block">
+                <pre>import { EnhancedInscriptionViewer } from 'bitcoin-inscription-viewer';
+
+// Custom fetcher for wallet integration
+const customFetcher = async (inscriptionId) => {
+  // Your custom fetching logic
+  const response = await myWallet.getInscriptionContent(inscriptionId);
+  return {
+    content: response.data,
+    contentType: response.mimeType
+  };
+};
+
+&lt;EnhancedInscriptionViewer
+  inscriptions={inscriptionIds}
+  contentFetcher={customFetcher}
+  preferLaserEyes={true}
+/&gt;</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <h3>Cache Configuration</h3>
+            <div class="code-block">
+                <pre>const cacheConfig = {
+  enabled: true,
+  strategy: 'lru',           // LRU eviction strategy
+  maxSize: 1000,             // Max 1000 cached items
+  ttl: 30 * 60 * 1000,      // 30 minute TTL
+  maxMemoryUsage: 100 * 1024 * 1024  // 100MB memory limit
+};
+
+&lt;EnhancedInscriptionViewer
+  inscriptions={inscriptions}
+  cacheConfig={cacheConfig}
+/&gt;</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </section>
+
+        <!-- Service Worker Section -->
+        <section id="service-worker" class="section">
+            <h2>🚀 Service Worker Caching</h2>
+            <p>Intelligent caching and offline support for enhanced performance:</p>
+
+            <div class="feature-card">
+                <h4>useServiceWorker Hook</h4>
+                <span class="status">✅ Working</span>
+                <p>React hook for service worker management with real-time statistics and cache control.</p>
+                
+                <h3>Setup Instructions</h3>
+                <div class="code-block">
+                    <pre># 1. Copy service worker to your public directory
+cp node_modules/bitcoin-inscription-viewer/dist/inscription-sw.js public/
+
+# 2. Use the hook in your React app
+import { useServiceWorker } from 'bitcoin-inscription-viewer';</pre>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+                <h3>Basic Usage</h3>
+                <div class="code-block">
+                    <pre>import React from 'react';
+import { useServiceWorker } from 'bitcoin-inscription-viewer';
+
+function App() {
+  const { 
+    isRegistered, 
+    isActive, 
+    registrationError,
+    cacheStats, 
+    recentStats,
+    clearCache,
+    prefetchContent 
+  } = useServiceWorker();
+
+  // Handle registration errors gracefully
+  if (registrationError) {
+    console.warn('Service Worker disabled:', registrationError);
+  }
+
+  return (
+    &lt;div&gt;
+      {isActive ? (
+        &lt;div className="cache-stats"&gt;
+          &lt;h4&gt;Cache Performance&lt;/h4&gt;
+          &lt;p&gt;Hit Rate: {(recentStats.hitRate * 100).toFixed(1)}%&lt;/p&gt;
+          &lt;p&gt;Hits: {recentStats.hits} | Misses: {recentStats.misses}&lt;/p&gt;
+          {cacheStats && (
+            &lt;p&gt;Cache Size: {cacheStats.entries} entries&lt;/p&gt;
+          )}
+          &lt;button onClick={() =&gt; clearCache()}&gt;Clear Cache&lt;/button&gt;
+        &lt;/div&gt;
+      ) : (
+        &lt;p&gt;Service Worker not active&lt;/p&gt;
+      )}
+      
+      {/* Your inscription components */}
+    &lt;/div&gt;
+  );
+}</pre>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+                <h3>Advanced Configuration</h3>
+                <div class="code-block">
+                    <pre>import { swManager } from 'bitcoin-inscription-viewer';
+
+// Configure service worker before registration
+swManager.configure({
+  path: '/custom-sw.js',    // Custom service worker path
+  scope: '/inscriptions/'   // Custom scope (default: '/')
+});
+
+// Manual cache management
+const handlePrefetch = async () => {
+  const urls = [
+    'https://ordinals.com/content/abc123...',
+    'https://ordinals.com/content/def456...'
+  ];
+  
+  const result = await swManager.prefetchContent(urls);
+  console.log(`Prefetched ${result.prefetched}/${result.total} items`);
+};
+
+// Get detailed cache statistics
+const handleCacheStats = async () => {
+  const result = await swManager.getCacheStats();
+  if (result.success) {
+    console.log('Cache stats:', result.stats);
+  }
+};</pre>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+                <h3>Features & Benefits</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Smart Caching</h4>
+                        <p>Automatically caches inscription content and metadata for faster subsequent loads.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Offline Support</h4>
+                        <p>View previously loaded inscriptions without internet connection.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Performance Metrics</h4>
+                        <p>Real-time cache hit rates and performance statistics.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Bandwidth Savings</h4>
+                        <p>Reduce API calls and data usage with intelligent caching.</p>
+                    </div>
+                </div>
+
+                <h3>Troubleshooting</h3>
+                <div class="code-block">
+                    <pre>// Common issues and solutions:
+
+// 1. Service worker file not found (404)
+// Make sure inscription-sw.js is in your public directory
+
+// 2. HTTPS required
+// Service workers only work over HTTPS (or localhost for development)
+
+// 3. Browser compatibility
+// Check if service workers are supported:
+if ('serviceWorker' in navigator) {
+  console.log('Service Worker supported');
+} else {
+  console.log('Service Worker not supported');
+}
+
+// 4. Scope issues
+// Service worker can only control pages within its scope
+// Default scope is '/' (entire domain)</pre>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section id="examples" class="section">
+            <h2>💡 Real-World Examples</h2>
+            <p>Complete examples you can copy and use in your projects:</p>
+
+            <h3>Complete Gallery with All Features</h3>
+            <div class="code-block">
+                <pre>import React, { useState } from 'react';
+import { 
+  EnhancedInscriptionViewer,
+  useInscriptionPerformance,
+  useInscriptionCache
+} from 'bitcoin-inscription-viewer';
+
+function MyInscriptionApp() {
+  const [inscriptions] = useState([
+    'dca3da701a2607de6c89dd0bfe6106532dcefe279d13b105301a2d85eb4ffaafi0',
+    '0e50a465fc0ca415f3cb8a4aac1555b12a4bf3f33bc039f2a4d39f809e83af7ai0',
+    '934905624f847731e7f173ba70bfa3a1389b0a7fe2a4ffce8793eef2730b9ab9i0',
+    // ... more inscription IDs
+  ]);
+
+  const { metrics } = useInscriptionPerformance();
+  const { stats } = useInscriptionCache({
+    enabled: true,
+    maxSize: 1000
+  });
+
+  return (
+    &lt;div&gt;
+      {/* Performance Stats */}
+      &lt;div style={{ marginBottom: '20px', padding: '10px', background: '#f5f5f5' }}&gt;
+        &lt;h4&gt;Performance&lt;/h4&gt;
+        &lt;p&gt;Cache Hit Rate: {(stats.hitRate * 100).toFixed(1)}%&lt;/p&gt;
+        &lt;p&gt;Avg Load Time: {metrics.averageLoadTime}ms&lt;/p&gt;
+      &lt;/div&gt;
+
+      {/* Main Gallery */}
+      &lt;EnhancedInscriptionViewer
+        inscriptions={inscriptions}
+        enableVirtualScrolling={true}
+        performanceOptions={{
+          enableMemoryOptimization: true,
+          preloadNext: 5
+        }}
+        cacheConfig={{
+          enabled: true,
+          strategy: 'lru',
+          maxSize: 1000,
+          ttl: 30 * 60 * 1000
+        }}
+        batchFetching={{
+          enabled: true,
+          batchSize: 50,
+          batchDelay: 100
+        }}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default MyInscriptionApp;</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <h3>Simple Gallery</h3>
+            <div class="code-block">
+                <pre>import React from 'react';
+import { InscriptionGallery } from 'bitcoin-inscription-viewer';
+
+function SimpleGallery() {
+  const inscriptionIds = [
+    'dca3da701a2607de6c89dd0bfe6106532dcefe279d13b105301a2d85eb4ffaafi0',
+    '0e50a465fc0ca415f3cb8a4aac1555b12a4bf3f33bc039f2a4d39f809e83af7ai0'
+  ];
+
+  return (
+    &lt;InscriptionGallery
+      inscriptionIds={inscriptionIds}
+      columns={2}
+      cardSize={250}
+      showIndex={true}
+      enableModal={true}
+    /&gt;
+  );
+}
+
+export default SimpleGallery;</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <h3>Wallet Integration Example</h3>
+            <div class="code-block">
+                <pre>import React, { useState, useEffect } from 'react';
+import { LaserEyesInscriptionGallery } from 'bitcoin-inscription-viewer';
+import { useLaserEyes } from '@omnisat/lasereyes';
+
+function WalletGallery() {
+  const { isConnected, address, getInscriptions } = useLaserEyes();
+  const [walletInscriptions, setWalletInscriptions] = useState([]);
+
+  useEffect(() => {
+    if (isConnected && address) {
+      loadWalletInscriptions();
+    }
+  }, [isConnected, address]);
+
+  const loadWalletInscriptions = async () => {
+    try {
+      const inscriptions = await getInscriptions();
+      setWalletInscriptions(inscriptions.map(i => i.id));
+    } catch (error) {
+      console.error('Failed to load wallet inscriptions:', error);
+    }
+  };
+
+  if (!isConnected) {
+    return &lt;div&gt;Please connect your wallet&lt;/div&gt;;
+  }
+
+  return (
+    &lt;LaserEyesInscriptionGallery
+      inscriptionIds={walletInscriptions}
+      columns={3}
+      cardSize={200}
+      showIndex={true}
+      enableModal={true}
+    /&gt;
+  );
+}
+
+export default WalletGallery;</pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                Bitcoin Inscription Viewer - 
+                <a href="https://github.com/your-repo" target="_blank">GitHub</a> | 
+                <a href="https://npmjs.com/package/bitcoin-inscription-viewer" target="_blank">NPM</a>
+            </p>
+            <p>Built with ❤️ for the Bitcoin community</p>
+        </div>
+    </div>
+
+    <script src="./docs.js"></script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import { useVirtualScroll } from '../../hooks/useVirtualScroll';
 import { useInscriptionPerformance } from '../../hooks/usePerformanceMonitor';
 import { useInscriptionCache } from '../../hooks/useInscriptionCache';
 import { useBatchFetcher } from '../../utils/batchFetcher';
+import { throttledFetch } from '../../utils/requestThrottler';
 import { normalizeInscriptions } from '../../types';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 
@@ -121,18 +122,18 @@ const VirtualizedInscriptionCard: React.FC<VirtualizedInscriptionCardProps> = ({
 
   return (
     <div 
-      className="border border-gray-200 dark:border-gray-700 rounded-lg p-2 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+      className="relative border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
       style={{ width: size, height: size, maxWidth: '100%', maxHeight: '100%' }}
     >
       {index && (
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 px-1" style={{ height: '16px', lineHeight: '16px' }}>
+        <div className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1" style={{ height: '20px', lineHeight: '18px' }}>
           #{index}
         </div>
       )}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden" style={{ height: index ? `${size - 20}px` : `${size}px` }}>
         <InscriptionRenderer
           inscriptionId={inscription.id}
-          size={size - (index ? 24 : 8)} // Account for padding and optional index
+          size={index ? size - 20 : size} // Account for index header height only
           showControls={showControls}
           showHeader={false}
           htmlRenderMode={htmlRenderMode}
@@ -141,16 +142,6 @@ const VirtualizedInscriptionCard: React.FC<VirtualizedInscriptionCardProps> = ({
           className="w-full h-full"
         />
       </div>
-      {onInscriptionClick && (
-        <Button
-          onClick={() => onInscriptionClick(inscription)}
-          className="mt-1 w-full text-xs"
-          variant="outline"
-          size="sm"
-        >
-          View Details
-        </Button>
-      )}
     </div>
   );
 };
@@ -207,9 +198,10 @@ export const InscriptionGallery: React.FC<InscriptionGalleryProps> = ({
 
   // Initialize batch fetcher with optimized settings for high performance
   const { fetchBatch, getActiveRequests, getQueueSize } = useBatchFetcher({
-    batchSize: batchFetching.batchSize || 50, // Much larger batch size
-    maxConcurrency: 10, // More concurrent requests
-    retryAttempts: 1 // Reduce retry attempts for speed
+    batchSize: batchFetching.batchSize || 3, // Much smaller batch size to avoid resource exhaustion
+    maxConcurrency: 1, // Single request at a time to be extra conservative
+    retryAttempts: 1, // Reduce retry attempts for speed
+    retryDelay: 3000 // Longer delay between retries
   });
 
   // Virtual scrolling setup - optimized for massive datasets
@@ -224,34 +216,27 @@ export const InscriptionGallery: React.FC<InscriptionGalleryProps> = ({
       containerHeight: 800, // Larger viewport for better performance
       overscan: 15, // Much larger overscan for smoother scrolling
       enabled: enableVirtualScrolling,
-      prefetchDistance: 50, // Aggressive prefetching
+      prefetchDistance: 5, // Much more conservative prefetching 
       onPrefetch: enableVirtualScrolling ? (items: InscriptionData[], startIndex: number, endIndex: number) => {
-        // Batch prefetch content aggressively
-        const fetchRequests = items.map(item => ({
-          id: item.id,
-          priority: 1,
-          fetcher: async () => {
-            // Mock fetcher - in real implementation, this would fetch from API
-            const response = await fetch(`https://ordinals.com/content/${item.id}`);
-            return response.blob();
-          }
-        }));
+        // Only prefetch a very small number of items to avoid resource exhaustion
+        const limitedItems = items.slice(0, 2); // Only prefetch 2 items max
         
-        // Use batch fetcher for prefetching
-        if (fetchRequests.length > 0) {
-          fetchBatch(fetchRequests).catch(err => {
-            console.warn('Prefetch failed:', err);
-          });
+        // Use preloadContent instead of direct fetch to respect cache
+        const uncachedItems = limitedItems.filter(item => !isInCache(item.id));
+        if (uncachedItems.length > 0) {
+          // Use the cache system instead of direct fetch with a delay
+          setTimeout(() => {
+            preloadContent(
+              uncachedItems.map(item => item.id),
+              async (id: string) => {
+                const response = await throttledFetch(`https://ordinals.com/content/${id}`);
+                return response.blob();
+              }
+            ).catch(err => {
+              console.warn('Cache preload failed:', err);
+            });
+          }, Math.random() * 3000); // Random delay to spread out requests
         }
-        
-        // Update cache stats
-        items.forEach(item => {
-          if (!isInCache(item.id)) {
-            recordCacheMiss(item.id);
-          } else {
-            recordCacheHit(item.id);
-          }
-        });
       } : undefined
     };
   }, [cardSize, enableVirtualScrolling, columns, isInCache, recordCacheMiss, recordCacheHit, fetchBatch]);

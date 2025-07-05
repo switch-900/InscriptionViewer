@@ -10,22 +10,37 @@ const AdvancedUsageExample: React.FC = () => {
   // Example: Simulating fetched API data with different formats
   const apiResponse1 = {
     ids: [
-      "1463d48e9248159084929294f64bda04487503d30ce7ab58365df1dc6fd58218i0",
-      "6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0",
-      "0301e0480b374b32dcb6dd121b77be4b72a96721588a9ba40f148ba2b9aa72b1i0",
-      "50a42e51e6ce0ef76699f017a1017d7b5b6203e67d283c625ba7d1567b2e43bai0"
-    ]
+  // Famous inscriptions that are guaranteed to exist
+  '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0', // Bitcoin Whitepaper
+  'b61b0172d95e266c18aea0c624db987e971a5d6d4ebc2aaed85da4642d635735i0', // First inscription
+  '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0aei0', // Popular text
+     // JPEG image/jpeg
+    "d642ea0c994e35e912b90e9d49dcebebafcbebd574e37627c4fa86ce6eeef4fei0",
+    // MP4 video/mp4
+    "e45035fcdb3ba93cf56d6e3379b5dd1d60b16cbff44293caee6fc055c497ca3ai0",
+    // SVG image/svg+xml
+    "ad2a52669655f5f657b6aac7c7965d6992afc6856e200c4f3a8d46c1d5d119cfi0",
+    // MPEG audio/mpeg
+    "88ccc6fc79d23cce364a33a815800872d4e03f3004adf45e94cfce137a720816i0",
+    // GLTF model/gltf-binary
+    "672274cff8a6a5f4cbd2dcf6c99f838ef8cc097de1f449a9b912d6e7b2378269i0",
+    // HTML
+    "d3b049472e885b65ed0513a675c8e01a28fffe5eb8b347394168048390c8b14ci0",
+    // Js
+    "45bcb818d139fa31a4fa57f21693af471abdd4cf9e48971c46e36e6f6d2b68cfi0"
+  ]
+
   };
 
   const apiResponse2 = {
     children: [
       {
-        id: "1463d48e9248159084929294f64bda04487503d30ce7ab58365df1dc6fd58218i0",
+        id: "6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0",
         number: 21000000,
         contentType: "text/plain"
       },
       {
-        id: "6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0", 
+        id: "ad2a52669655f5f657b6aac7c7965d6992afc6856e200c4f3a8d46c1d5d119cfi0", 
         number: 21000001,
         contentType: "image/svg+xml"
       }

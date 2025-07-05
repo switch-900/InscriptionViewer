@@ -37,11 +37,11 @@ class BatchFetcher {
 
   constructor(config: BatchFetchConfig = {}) {
     this.config = {
-      batchSize: config.batchSize || 10,
-      maxConcurrency: config.maxConcurrency || 5,
-      retryAttempts: config.retryAttempts || 3,
-      retryDelay: config.retryDelay || 1000,
-      timeout: config.timeout || 10000,
+      batchSize: config.batchSize || 5,
+      maxConcurrency: config.maxConcurrency || 1,
+      retryAttempts: config.retryAttempts || 2,
+      retryDelay: config.retryDelay || 2000,
+      timeout: config.timeout || 15000,
       priorityQueue: config.priorityQueue || false
     };
   }
@@ -63,6 +63,11 @@ class BatchFetcher {
     for (let i = 0; i < sortedRequests.length; i += this.config.batchSize) {
       const batch = sortedRequests.slice(i, i + this.config.batchSize);
       await this.processBatchConcurrently(batch, successful, failed, responseTimes);
+      
+      // Add delay between batches to avoid overwhelming the API
+      if (i + this.config.batchSize < sortedRequests.length) {
+        await this.delay(1000); // 1 second delay between batches
+      }
     }
 
     const totalTime = Date.now() - startTime;

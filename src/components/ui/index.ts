@@ -6,3 +6,4 @@ export { Slider } from './slider';
 export { ToastProvider, useToast } from './toast';
 export type { Toast } from './toast';
 export { ErrorBoundary, useErrorBoundary, withErrorBoundary } from './ErrorBoundary';
+export { Alert, AlertDescription } from './alert';

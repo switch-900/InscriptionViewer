@@ -134,11 +134,15 @@ export function TextRenderer({
         }}
       >
         <pre 
-          className={`text-xs p-4 w-full h-full overflow-auto font-mono whitespace-pre-wrap break-words ${
+          className={`text-xs p-4 w-full h-full overflow-auto font-mono whitespace-pre-wrap break-words scrollbar-hide ${
             isCode 
               ? 'text-gray-800 dark:text-gray-200' 
               : 'text-gray-900 dark:text-gray-100'
           }`}
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* IE and Edge */
+          }}
         >
           {content}
         </pre>

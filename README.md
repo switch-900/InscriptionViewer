@@ -123,7 +123,7 @@ Display individual inscriptions with full controls:
 - **Batch Fetching** - Efficient concurrent loading
 - **Virtual Scrolling** - Handle thousands of inscriptions
 - **Performance Monitoring** - Real-time metrics
-- **Service Worker** - Offline support
+- **Service Worker** - Offline support and intelligent caching
 - **Custom Fetchers** - Pluggable data sources
 
 ## 🛠️ Installation & Setup
@@ -149,6 +149,85 @@ Works with any Bitcoin Ordinals API:
 - **Recursive endpoints** (recommended) - No Bitcoin node required
 - **Standard endpoints** - Fallback support
 - **Custom servers** - Configure your own endpoints
+
+## 🚀 Service Worker Caching
+
+The library includes an optional service worker for intelligent caching and offline support. The service worker provides:
+
+- **Smart Caching** - Automatic caching of inscription content and metadata
+- **Offline Support** - View previously loaded inscriptions without internet
+- **Performance** - Dramatically faster load times for cached content
+- **Bandwidth Savings** - Reduce API calls and data usage
+
+### Setup Service Worker
+
+1. **Copy the service worker file** to your public directory:
+   ```bash
+   cp node_modules/bitcoin-inscription-viewer/dist/inscription-sw.js public/
+   ```
+
+2. **Use the service worker hook** in your React app:
+   ```jsx
+   import { useServiceWorker } from 'bitcoin-inscription-viewer';
+
+   function App() {
+     const { 
+       isRegistered, 
+       isActive, 
+       registrationError,
+       cacheStats, 
+       recentStats,
+       clearCache,
+       prefetchContent 
+     } = useServiceWorker();
+
+     if (registrationError) {
+       console.warn('Service Worker disabled:', registrationError);
+     }
+
+     return (
+       <div>
+         {isActive && (
+           <div>
+             Cache Hit Rate: {(recentStats.hitRate * 100).toFixed(1)}%
+             <button onClick={() => clearCache()}>Clear Cache</button>
+           </div>
+         )}
+         {/* Your inscription components */}
+       </div>
+     );
+   }
+   ```
+
+3. **Custom Configuration** (optional):
+   ```jsx
+   import { swManager } from 'bitcoin-inscription-viewer';
+
+   // Configure before registration
+   swManager.configure({
+     path: '/custom-sw.js',  // Custom service worker path
+     scope: '/inscriptions/' // Custom scope
+   });
+   ```
+
+### Service Worker Features
+
+- **Automatic Registration** - No manual setup required
+- **Graceful Degradation** - Works without service worker if not available
+- **Error Handling** - Robust error handling for missing files
+- **Cache Statistics** - Real-time performance metrics
+- **Manual Control** - Programmatic cache management
+
+### Troubleshooting
+
+If the service worker isn't working:
+
+1. **Check file location** - Ensure `inscription-sw.js` is in your public directory
+2. **HTTPS required** - Service workers only work over HTTPS (or localhost)
+3. **Browser support** - Check if service workers are supported
+4. **Console errors** - Check browser console for registration errors
+
+The library will work perfectly without the service worker - it's purely an optimization.
 
 ## 🤝 Contributing
 

@@ -36,6 +36,16 @@ code {
   background: #a8a8a8;
 }
 
+/* Hide scrollbars utility class */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
 /* Smooth transitions for all elements */
 * {
   transition: all 0.2s ease-in-out;

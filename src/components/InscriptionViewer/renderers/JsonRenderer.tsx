@@ -188,7 +188,10 @@ export function JsonRenderer({
         <div className="flex-1 p-4">
           <div className="text-red-600 dark:text-red-400 mb-2">JSON Parse Error:</div>
           <div className="text-sm text-red-500 mb-4">{parseError}</div>
-          <pre className="text-xs font-mono bg-gray-100 dark:bg-gray-800 p-3 rounded overflow-auto whitespace-pre-wrap">
+          <pre className="text-xs font-mono bg-gray-100 dark:bg-gray-800 p-3 rounded overflow-auto whitespace-pre-wrap scrollbar-hide" style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* IE and Edge */
+          }}>
             {content}
           </pre>
         </div>
@@ -245,7 +248,10 @@ export function JsonRenderer({
           minHeight: '100px'
         }}
       >
-        <div className="w-full h-full overflow-auto">
+        <div className="w-full h-full overflow-auto scrollbar-hide" style={{
+          scrollbarWidth: 'none', /* Firefox */
+          msOverflowStyle: 'none', /* IE and Edge */
+        }}>
           {parsedJson && renderValue(parsedJson)}
         </div>
       </div>

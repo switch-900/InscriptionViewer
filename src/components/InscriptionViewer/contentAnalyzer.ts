@@ -3,6 +3,8 @@
  * Analyzes content headers and first few bytes to determine the best rendering approach
  */
 
+import { throttledFetch } from '../../utils/requestThrottler';
+
 export interface ContentInfo {
   mimeType: string;
   detectedType: 'text' | 'image' | 'audio' | 'video' | 'html' | 'json' | 'svg' | '3d' | 'pdf' | 'archive' | 'document' | 'code' | 'font' | 'ebook' | 'executable' | 'data' | 'binary' | 'unknown';
@@ -24,8 +26,12 @@ export interface ContentAnalysis {
 /**
  * Analyze content from response headers and initial bytes
  */
-export async function analyzeContent(url: string): Promise<ContentAnalysis> {
-  console.log(`🔍 Starting content analysis for: ${url}`);
+export async function analyzeContent(
+  url: string, 
+  originalInscriptionId?: string,
+  knownContentType?: string
+): Promise<ContentAnalysis> {
+  console.log(`🔍 Starting content analysis for: ${url}`, { originalInscriptionId, knownContentType });
   
   try {
     // Determine if this is a JSON API endpoint based on URL patterns
@@ -54,7 +60,7 @@ export async function analyzeContent(url: string): Promise<ContentAnalysis> {
         headers['Range'] = 'bytes=0-8191'; // First 8KB for content
       }
       
-      response = await fetch(url, { headers });
+      response = await throttledFetch(url, { headers });
       
       if (response.status === 206 && !isJsonEndpoint) {
         // Range request succeeded
@@ -63,7 +69,7 @@ export async function analyzeContent(url: string): Promise<ContentAnalysis> {
       } else if (response.status === 416 && !isJsonEndpoint) {
         // Range not satisfiable, fall back to regular request
         console.log(`⚠️ Range not supported, falling back to full request for: ${url}`);
-        response = await fetch(url);
+        response = await throttledFetch(url);
       } else if (!response.ok) {
         // For 404 and 400 errors, don't retry - these are permanent failures
         if (response.status === 404 || response.status === 400) {
@@ -79,7 +85,7 @@ export async function analyzeContent(url: string): Promise<ContentAnalysis> {
       
       // Range request failed, try regular request
       console.log(`⚠️ Range request failed, trying full request for: ${url}`, rangeError);
-      response = await fetch(url);
+      response = await throttledFetch(url);
     }
 
     if (!response.ok) {
@@ -110,7 +116,7 @@ export async function analyzeContent(url: string): Promise<ContentAnalysis> {
       // Not valid UTF-8, likely binary
     }
 
-    const info = analyzeContentType(contentType, bytes, textContent, url);
+    const info = analyzeContentType(contentType, bytes, textContent, url, originalInscriptionId, knownContentType);
     
     return {
       contentInfo: {
@@ -141,13 +147,222 @@ function analyzeContentType(
   mimeType: string, 
   bytes: Uint8Array, 
   textContent: string,
-  url: string
+  url: string,
+  originalInscriptionId?: string,
+  knownContentType?: string
 ): Omit<ContentInfo, 'mimeType'> {
   const lowerMime = mimeType.toLowerCase();
   
-  // Extract file extension from URL
-  const urlPath = new URL(url).pathname;
-  const fileExtension = urlPath.split('.').pop()?.toLowerCase();
+  console.log(`🔬 Analyzing content type - MIME: ${lowerMime}, Bytes: ${bytes.length}, Has text: ${!!textContent}`);
+  
+  // For Bitcoin inscriptions, we primarily analyze based on:
+  // 1. MIME type from inscription metadata 
+  // 2. Magic bytes from actual content
+  // 3. Content structure analysis
+  // File extensions are only used as a last resort hint
+  
+  let fileExtension: string | undefined;
+  
+  // =============================================================================
+  // BINARY CONTENT - MAGIC BYTE DETECTION (Priority 1)
+  // Analyze actual content bytes first - this is most reliable for inscriptions
+  // =============================================================================
+  
+  if (bytes.length >= 4) {
+    const magic = Array.from(bytes.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const magic8 = bytes.length >= 8 ? Array.from(bytes.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join('') : '';
+    
+    console.log(`🔍 Magic bytes: ${magic} (first 4), ${magic8} (first 8)`);
+    
+    // PNG magic bytes: 89 50 4E 47
+    if (magic === '89504e47') {
+      console.log('✅ Detected PNG by magic bytes');
+      return {
+        detectedType: 'image',
+        renderStrategy: 'native',
+        fileExtension: 'png',
+        isInlineable: true,
+        category: 'media',
+        displayName: 'PNG Image',
+        description: 'Portable Network Graphics (detected by content)'
+      };
+    }
+    
+    // JPEG magic bytes: FF D8
+    if (magic.startsWith('ffd8')) {
+      console.log('✅ Detected JPEG by magic bytes');
+      return {
+        detectedType: 'image',
+        renderStrategy: 'native',
+        fileExtension: 'jpg',
+        isInlineable: true,
+        category: 'media',
+        displayName: 'JPEG Image',
+        description: 'JPEG compressed image (detected by content)'
+      };
+    }
+
+    // GIF magic bytes: 47 49 46 38 (GIF8)
+    if (magic === '47494638') {
+      console.log('✅ Detected GIF by magic bytes');
+      return {
+        detectedType: 'image',
+        renderStrategy: 'native',
+        fileExtension: 'gif',
+        isInlineable: true,
+        category: 'media',
+        displayName: 'GIF Animation',
+        description: 'Graphics Interchange Format (detected by content)'
+      };
+    }
+
+    // WebP magic bytes: RIFF....WEBP
+    if (magic === '52494646' && bytes.length >= 12) {
+      const webpSignature = Array.from(bytes.slice(8, 12)).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (webpSignature === '57454250') { // WEBP
+        console.log('✅ Detected WebP by magic bytes');
+        return {
+          detectedType: 'image',
+          renderStrategy: 'native',
+          fileExtension: 'webp',
+          isInlineable: true,
+          category: 'media',
+          displayName: 'WebP Image',
+          description: 'WebP compressed image (detected by content)'
+        };
+      }
+    }
+
+    // PDF magic bytes: %PDF
+    if (bytes.length >= 4 && String.fromCharCode(...bytes.slice(0, 4)) === '%PDF') {
+      console.log('✅ Detected PDF by magic bytes');
+      return {
+        detectedType: 'pdf',
+        renderStrategy: 'iframe',
+        fileExtension: 'pdf',
+        isInlineable: false,
+        category: 'document',
+        displayName: 'PDF Document',
+        description: 'Portable Document Format (detected by content)'
+      };
+    }
+
+    // ZIP magic bytes: 50 4B
+    if (magic.startsWith('504b')) {
+      console.log('✅ Detected ZIP by magic bytes');
+      return {
+        detectedType: 'archive',
+        renderStrategy: 'download',
+        fileExtension: 'zip',
+        isInlineable: false,
+        category: 'archive',
+        displayName: 'ZIP Archive',
+        description: 'ZIP compressed archive (detected by content)'
+      };
+    }
+  }
+  
+  // =============================================================================
+  // TEXT CONTENT ANALYSIS (Priority 2)
+  // Analyze the actual text content structure
+  // =============================================================================
+  
+  if (textContent) {
+    const trimmed = textContent.trim();
+    console.log(`📝 Analyzing text content: ${trimmed.substring(0, 100)}...`);
+    
+    // Check if it looks like HTML by content structure
+    if (trimmed.includes('<!DOCTYPE') || trimmed.includes('<html') || 
+        trimmed.includes('<head>') || trimmed.includes('<body>') ||
+        (trimmed.includes('<') && trimmed.includes('>') && trimmed.includes('</'))) {
+      console.log('✅ Detected HTML by content structure');
+      return {
+        detectedType: 'html',
+        renderStrategy: 'native',
+        fileExtension: 'html',
+        isInlineable: true,
+        category: 'document',
+        displayName: 'HTML Document',
+        description: 'HyperText Markup Language (detected by content)'
+      };
+    }
+
+    // Check if it looks like JSON by content structure
+    if ((trimmed.startsWith('{') && trimmed.includes('}')) || 
+        (trimmed.startsWith('[') && trimmed.includes(']'))) {
+      try {
+        JSON.parse(trimmed);
+        console.log('✅ Detected JSON by content structure');
+        return {
+          detectedType: 'json',
+          renderStrategy: 'native',
+          fileExtension: 'json',
+          isInlineable: true,
+          category: 'data',
+          displayName: 'JSON Data',
+          description: 'JavaScript Object Notation (detected by content)'
+        };
+      } catch {
+        console.log('❌ Content looks like JSON but failed to parse');
+      }
+    }
+
+    // Check if it looks like SVG by content structure
+    if (trimmed.includes('<svg') || trimmed.includes('xmlns="http://www.w3.org/2000/svg"')) {
+      console.log('✅ Detected SVG by content structure');
+      return {
+        detectedType: 'svg',
+        renderStrategy: 'native',
+        fileExtension: 'svg',
+        isInlineable: true,
+        category: 'media',
+        displayName: 'SVG Vector',
+        description: 'Scalable Vector Graphics (detected by content)'
+      };
+    }
+
+    // Check if it looks like XML
+    if (trimmed.includes('<?xml') || 
+        (trimmed.includes('<') && trimmed.includes('>') && trimmed.includes('</'))) {
+      console.log('✅ Detected XML by content structure');
+      return {
+        detectedType: 'text',
+        renderStrategy: 'native',
+        fileExtension: 'xml',
+        encoding: 'utf-8',
+        isInlineable: true,
+        category: 'document',
+        displayName: 'XML Document',
+        description: 'Extensible Markup Language (detected by content)'
+      };
+    }
+  }
+
+  // =============================================================================
+  // MIME TYPE ANALYSIS (Priority 3)
+  // Use the MIME type provided with the inscription
+  // =============================================================================
+  
+  console.log(`🏷️ Analyzing by MIME type: ${lowerMime}`);
+  
+  // Infer file extension from MIME type for display purposes
+  if (lowerMime.includes('audio/mpeg') || lowerMime.includes('audio/mp3')) {
+    fileExtension = 'mp3';
+  } else if (lowerMime.includes('model/gltf-binary')) {
+    fileExtension = 'glb';
+  } else if (lowerMime.includes('model/gltf')) {
+    fileExtension = 'gltf';
+  } else if (lowerMime.includes('image/jpeg')) {
+    fileExtension = 'jpg';
+  } else if (lowerMime.includes('image/png')) {
+    fileExtension = 'png';
+  } else if (lowerMime.includes('video/mp4')) {
+    fileExtension = 'mp4';
+  } else if (lowerMime.includes('image/svg')) {
+    fileExtension = 'svg';
+  } else if (lowerMime.includes('text/html')) {
+    fileExtension = 'html';
+  }
 
   // =============================================================================
   // TEXT & MARKUP CONTENT
@@ -178,6 +393,69 @@ function analyzeContentType(
       category: 'document',
       displayName: 'HTML Document',
       description: 'HyperText Markup Language document'
+    };
+  }
+
+  // =============================================================================
+  // CODE & PROGRAMMING LANGUAGES (Check before text detection)
+  // =============================================================================
+  
+  const codeExtensions: Record<string, string> = {
+    // Web technologies
+    'js': 'JavaScript', 'jsx': 'JSX', 'ts': 'TypeScript', 'tsx': 'TSX',
+    'css': 'CSS', 'scss': 'SCSS', 'sass': 'Sass', 'less': 'Less',
+    'php': 'PHP', 'asp': 'ASP', 'aspx': 'ASP.NET',
+    
+    // Popular languages
+    'py': 'Python', 'java': 'Java', 'c': 'C', 'cpp': 'C++', 'cc': 'C++',
+    'h': 'C Header', 'hpp': 'C++ Header',
+    'cs': 'C#', 'vb': 'Visual Basic', 'fs': 'F#',
+    'rb': 'Ruby', 'go': 'Go', 'rs': 'Rust', 'kt': 'Kotlin',
+    'swift': 'Swift', 'dart': 'Dart', 'scala': 'Scala',
+    'pl': 'Perl', 'pm': 'Perl Module',
+    
+    // Functional languages
+    'hs': 'Haskell', 'ml': 'ML', 'elm': 'Elm', 'clj': 'Clojure',
+    'lisp': 'Lisp', 'scm': 'Scheme', 'rkt': 'Racket',
+    
+    // Shell and scripting
+    'sh': 'Shell Script', 'bash': 'Bash', 'zsh': 'Zsh', 'fish': 'Fish',
+    'ps1': 'PowerShell', 'bat': 'Batch', 'cmd': 'Command',
+    
+    // Data and config
+    'xml': 'XML', 'xsl': 'XSLT', 'xsd': 'XML Schema',
+    'sql': 'SQL', 'psql': 'PostgreSQL', 'mysql': 'MySQL',
+    
+    // Assembly and low-level
+    'asm': 'Assembly', 's': 'Assembly', 'nasm': 'NASM',
+    
+    // Other languages
+    'lua': 'Lua', 'vim': 'Vim Script', 'r': 'R', 'matlab': 'MATLAB',
+    'julia': 'Julia', 'nim': 'Nim', 'zig': 'Zig'
+  };
+
+  if (codeExtensions[fileExtension || ''] || 
+      lowerMime.includes('javascript') || lowerMime.includes('python') ||
+      lowerMime.includes('x-python') || lowerMime.includes('x-perl') ||
+      lowerMime.includes('x-ruby') || lowerMime.includes('x-php') ||
+      lowerMime.includes('x-c') || lowerMime.includes('x-java') ||
+      lowerMime.includes('x-go') || lowerMime.includes('x-rust') ||
+      lowerMime.includes('x-csharp') || lowerMime.includes('x-kotlin') ||
+      lowerMime.includes('x-swift') || lowerMime.includes('x-dart') ||
+      lowerMime.includes('x-scala') || lowerMime.includes('x-shell') ||
+      lowerMime.includes('x-sql') || lowerMime.includes('x-lua')) {
+    
+    const languageName = codeExtensions[fileExtension || ''] || 'Source Code';
+    
+    return {
+      detectedType: 'code',
+      renderStrategy: 'native',
+      fileExtension,
+      encoding: 'utf-8',
+      isInlineable: true,
+      category: 'code',
+      displayName: languageName,
+      description: `${languageName} source code`
     };
   }
 
@@ -223,63 +501,6 @@ function analyzeContentType(
       category: 'document',
       displayName,
       description
-    };
-  }
-
-  // =============================================================================
-  // CODE & PROGRAMMING LANGUAGES
-  // =============================================================================
-  
-  const codeExtensions: Record<string, string> = {
-    // Web technologies
-    'js': 'JavaScript', 'jsx': 'JSX', 'ts': 'TypeScript', 'tsx': 'TSX',
-    'css': 'CSS', 'scss': 'SCSS', 'sass': 'Sass', 'less': 'Less',
-    'php': 'PHP', 'asp': 'ASP', 'aspx': 'ASP.NET',
-    
-    // Popular languages
-    'py': 'Python', 'java': 'Java', 'c': 'C', 'cpp': 'C++', 'cc': 'C++',
-    'h': 'C Header', 'hpp': 'C++ Header',
-    'cs': 'C#', 'vb': 'Visual Basic', 'fs': 'F#',
-    'rb': 'Ruby', 'go': 'Go', 'rs': 'Rust', 'kt': 'Kotlin',
-    'swift': 'Swift', 'dart': 'Dart', 'scala': 'Scala',
-    'pl': 'Perl', 'pm': 'Perl Module',
-    
-    // Functional languages
-    'hs': 'Haskell', 'ml': 'ML', 'elm': 'Elm', 'clj': 'Clojure',
-    'lisp': 'Lisp', 'scm': 'Scheme', 'rkt': 'Racket',
-    
-    // Shell and scripting
-    'sh': 'Shell Script', 'bash': 'Bash', 'zsh': 'Zsh', 'fish': 'Fish',
-    'ps1': 'PowerShell', 'bat': 'Batch', 'cmd': 'Command',
-    
-    // Data and config
-    'xml': 'XML', 'xsl': 'XSLT', 'xsd': 'XML Schema',
-    'sql': 'SQL', 'psql': 'PostgreSQL', 'mysql': 'MySQL',
-    
-    // Assembly and low-level
-    'asm': 'Assembly', 's': 'Assembly', 'nasm': 'NASM',
-    
-    // Other languages
-    'lua': 'Lua', 'vim': 'Vim Script', 'r': 'R', 'matlab': 'MATLAB',
-    'julia': 'Julia', 'nim': 'Nim', 'zig': 'Zig'
-  };
-
-  if (codeExtensions[fileExtension || ''] || 
-      lowerMime.includes('javascript') || lowerMime.includes('python') ||
-      lowerMime.includes('x-python') || lowerMime.includes('x-perl') ||
-      lowerMime.includes('x-ruby') || lowerMime.includes('x-php')) {
-    
-    const languageName = codeExtensions[fileExtension || ''] || 'Source Code';
-    
-    return {
-      detectedType: 'code',
-      renderStrategy: 'native',
-      fileExtension,
-      encoding: 'utf-8',
-      isInlineable: true,
-      category: 'code',
-      displayName: languageName,
-      description: `${languageName} source code`
     };
   }
 

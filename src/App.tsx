@@ -5,11 +5,23 @@ import { LaserEyesInscriptionGallery } from './components/LaserEyesInscriptionGa
 import { LiveDemo } from './components/LiveDemo';
 import { ResponsiveTest } from './components/ResponsiveTest';
 import { Button } from './components/ui/button';
+import { useServiceWorker } from './services';
 
-type ViewType = 'home' | 'live-demo' | 'responsive-test' | 'library-demo' | 'lasereyes-demo' | 'explorer';
+type ViewType = 'home' | 'live-demo' | 'responsive-test' | 'library-demo' | 'lasereyes-demo' | 'explorer' | 'service-worker' | 'enhanced-optimization';
 
 function App() {
   const [view, setView] = useState<ViewType>('home');
+  
+  // Service Worker integration for the demo
+  const { 
+    isRegistered, 
+    isActive, 
+    registrationError,
+    cacheStats, 
+    recentStats,
+    clearCache,
+    prefetchContent 
+  } = useServiceWorker();
 
   // Sample inscription IDs for demonstrations
   const sampleInscriptions = [
@@ -73,6 +85,18 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* Service Worker Status */}
+      {isRegistered && (
+        <section className="text-center py-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span className="text-sm text-green-700 font-medium">
+              Service Worker Active - Enhanced Performance Enabled
+            </span>
+          </div>
+        </section>
+      )}
 
       {/* Features Grid */}
       <section className="py-16 bg-white rounded-xl shadow-sm">
@@ -257,6 +281,18 @@ function App() {
               >
                 🔧 Explorer
               </NavButton>
+              <NavButton 
+                active={view === 'service-worker'} 
+                onClick={() => setView('service-worker')}
+              >
+                🚀 Service Worker
+              </NavButton>
+              <NavButton 
+                active={view === 'enhanced-optimization'} 
+                onClick={() => setView('enhanced-optimization')}
+              >
+                ⚡ Enhanced
+              </NavButton>
             </div>
             
             {/* Mobile menu */}
@@ -272,6 +308,8 @@ function App() {
                 <option value="library-demo">📚 Library</option>
                 <option value="lasereyes-demo">🔥 LaserEyes</option>
                 <option value="explorer">🔧 Explorer</option>
+                <option value="service-worker">🚀 Service Worker</option>
+                <option value="enhanced-optimization">⚡ Enhanced</option>
               </select>
             </div>
           </div>
@@ -510,6 +548,254 @@ function MyWalletApp() {
         )}
         
         {view === 'explorer' && <InscriptionExplorer />}
+        
+        {view === 'service-worker' && (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                🚀 Service Worker Demo
+              </h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Intelligent caching and offline support for inscription content. 
+                Service worker provides faster load times and reduced bandwidth usage.
+              </p>
+            </div>
+
+            {/* Service Worker Status */}
+            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200 p-6">
+              <h3 className="text-lg font-semibold mb-3 text-purple-800">
+                🔧 Service Worker Status
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className={`w-3 h-3 rounded-full ${isRegistered ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className="text-sm">
+                    Registration: {isRegistered ? 'Success' : 'Failed'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                  <span className="text-sm">
+                    Status: {isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                
+                {isActive && recentStats && (
+                  <>
+                    <div className="text-sm">
+                      <strong>Hit Rate:</strong> {(recentStats.hitRate * 100).toFixed(1)}%
+                    </div>
+                    <div className="text-sm">
+                      <strong>Cache Stats:</strong> {recentStats.hits} hits, {recentStats.misses} misses
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {registrationError && (
+                <div className="mt-3 text-xs text-red-600 bg-red-50 p-2 rounded">
+                  Error: {registrationError}
+                </div>
+              )}
+              
+              {isActive && (
+                <div className="mt-4 flex gap-3">
+                  <button
+                    onClick={() => clearCache()}
+                    className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                  >
+                    Clear Cache
+                  </button>
+                  <button
+                    onClick={() => prefetchContent([
+                      'https://ordinals.com/content/d642ea0c994e35e912b90e9d49dcebebafcbebd574e37627c4fa86ce6eeef4fei0',
+                      'https://ordinals.com/content/e45035fcdb3ba93cf56d6e3379b5dd1d60b16cbff44293caee6fc055c497ca3ai0'
+                    ])}
+                    className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                  >
+                    Prefetch Content
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Content Types Demo */}
+            <div className="bg-white rounded-lg border p-6">
+              <h3 className="text-xl font-semibold mb-4">📸 Multiple Content Types</h3>
+              <p className="text-gray-600 mb-4">
+                Testing various content types: JPEG images, MP4 videos, SVG graphics, MPEG audio, GLTF 3D models, and HTML content.
+              </p>
+              
+              <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                <h4 className="text-sm font-semibold mb-2 text-purple-800">Content Types Being Tested:</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-purple-700">
+                  <div>📸 JPEG Image</div>
+                  <div>🎥 MP4 Video</div>
+                  <div>🎨 SVG Graphics</div>
+                  <div>🎵 MPEG Audio</div>
+                  <div>🧊 GLTF 3D Model</div>
+                  <div>🌐 HTML Content</div>
+                </div>
+              </div>
+
+              <InscriptionGallery
+                inscriptionIds={[
+             // Famous inscriptions that are guaranteed to exist
+  '6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0', // Bitcoin Whitepaper
+  'b61b0172d95e266c18aea0c624db987e971a5d6d4ebc2aaed85da4642d635735i0', // First inscription
+  '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0aei0', // Popular text
+     // JPEG image/jpeg
+    "d642ea0c994e35e912b90e9d49dcebebafcbebd574e37627c4fa86ce6eeef4fei0",
+    // MP4 video/mp4
+    "e45035fcdb3ba93cf56d6e3379b5dd1d60b16cbff44293caee6fc055c497ca3ai0",
+    // SVG image/svg+xml
+    "ad2a52669655f5f657b6aac7c7965d6992afc6856e200c4f3a8d46c1d5d119cfi0",
+    // MPEG audio/mpeg
+    "88ccc6fc79d23cce364a33a815800872d4e03f3004adf45e94cfce137a720816i0",
+    // GLTF model/gltf-binary
+    "672274cff8a6a5f4cbd2dcf6c99f838ef8cc097de1f449a9b912d6e7b2378269i0",
+    // HTML
+    "d3b049472e885b65ed0513a675c8e01a28fffe5eb8b347394168048390c8b14ci0",
+    // Js
+    "45bcb818d139fa31a4fa57f21693af471abdd4cf9e48971c46e36e6f6d2b68cfi0"
+  ]}
+                columns={3}
+                cardSize={250}
+                showIndex={true}
+                enableModal={true}
+                showControls={true}
+                performanceOptions={{
+                  enableServiceWorker: true,
+                  preloadNext: 2,
+                  enableMemoryOptimization: true
+                }}
+              />
+            </div>
+
+            {/* Tips */}
+            <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
+              <h3 className="text-lg font-semibold mb-2 text-blue-800">
+                💡 Tips for Testing Service Worker
+              </h3>
+              <ul className="space-y-1 text-sm text-blue-700">
+                <li>• First load will cache the inscriptions</li>
+                <li>• Reload the page to see cached content load instantly</li>
+                <li>• Try going offline and reloading to see offline support</li>
+                <li>• Use browser dev tools (Application → Service Workers) to inspect</li>
+                <li>• Clear cache and compare load times before/after caching</li>
+              </ul>
+            </div>
+          </div>
+        )}
+        
+        {view === 'enhanced-optimization' && (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                ⚡ Enhanced Performance Demo
+              </h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Advanced caching, performance monitoring, and optimization features for large-scale inscription viewing.
+              </p>
+            </div>
+
+            {/* Performance Options */}
+            <div className="bg-gray-50 border rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4">🛠️ Performance Features</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white p-4 rounded border">
+                  <h4 className="font-semibold text-green-600">✅ LRU Caching</h4>
+                  <p className="text-sm text-gray-600">Intelligent cache eviction with TTL support</p>
+                </div>
+                <div className="bg-white p-4 rounded border">
+                  <h4 className="font-semibold text-green-600">✅ Batch Fetching</h4>
+                  <p className="text-sm text-gray-600">Concurrent loading with configurable batch sizes</p>
+                </div>
+                <div className="bg-white p-4 rounded border">
+                  <h4 className="font-semibold text-green-600">✅ Virtual Scrolling</h4>
+                  <p className="text-sm text-gray-600">Handle thousands of inscriptions efficiently</p>
+                </div>
+                <div className="bg-white p-4 rounded border">
+                  <h4 className="font-semibold text-green-600">✅ Service Worker</h4>
+                  <p className="text-sm text-gray-600">Intelligent caching and offline support</p>
+                </div>
+                <div className="bg-white p-4 rounded border">
+                  <h4 className="font-semibold text-green-600">✅ Memory Management</h4>
+                  <p className="text-sm text-gray-600">Automatic cleanup and optimization</p>
+                </div>
+                <div className="bg-white p-4 rounded border">
+                  <h4 className="font-semibold text-green-600">✅ Performance Metrics</h4>
+                  <p className="text-sm text-gray-600">Real-time monitoring and analytics</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Gallery */}
+            <div className="bg-white rounded-lg border p-6">
+              <h3 className="text-xl font-semibold mb-4">🚀 Enhanced Gallery</h3>
+              <p className="text-gray-600 mb-4">
+                Full-featured gallery with all optimization features enabled. 
+                Monitor cache performance and load times in real-time.
+              </p>
+
+              <InscriptionGallery
+                inscriptionIds={sampleInscriptions}
+                columns={3}
+                cardSize={250}
+                showIndex={true}
+                showControls={true}
+                enableModal={true}
+                enableVirtualScrolling={true}
+                cacheEnabled={true}
+                batchFetching={{
+                  enabled: true,
+                  batchSize: 5,
+                  batchDelay: 100
+                }}
+                performanceOptions={{
+                  enableServiceWorker: true,
+                  preloadNext: 3,
+                  enableMemoryOptimization: true
+                }}
+              />
+            </div>
+
+            {/* Code Example */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">📝 Usage Example</h3>
+              <pre className="bg-gray-800 text-gray-100 p-4 rounded text-xs overflow-x-auto">
+{`import { InscriptionGallery, useServiceWorker } from 'bitcoin-inscription-viewer';
+
+function MyApp() {
+  const { isActive, clearCache } = useServiceWorker();
+  
+  return (
+    <InscriptionGallery
+      inscriptionIds={inscriptionIds}
+      columns={3}
+      cardSize={250}
+      showControls={true}
+      enableVirtualScrolling={true}
+      cacheEnabled={true}
+      batchFetching={{
+        enabled: true,
+        batchSize: 10,
+        batchDelay: 100
+      }}
+      performanceOptions={{
+        enableServiceWorker: true,
+        preloadNext: 5,
+        enableMemoryOptimization: true
+      }}
+    />
+  );
+}`}
+              </pre>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Footer */}

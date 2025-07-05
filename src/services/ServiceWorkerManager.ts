@@ -19,6 +19,8 @@ class InscriptionServiceWorkerManager {
   private registration: ServiceWorkerRegistration | null = null;
   private cacheStats: ServiceWorkerCacheEvent[] = [];
   private isSupported = false;
+  private serviceWorkerPath = '/inscription-sw.js';
+  private serviceWorkerScope = '/';
 
   constructor() {
     this.isSupported = 'serviceWorker' in navigator;
@@ -38,6 +40,14 @@ class InscriptionServiceWorkerManager {
     }
   }
 
+  /**
+   * Configure service worker path and scope (call before register())
+   */
+  configure(options: { path?: string; scope?: string }) {
+    if (options.path) this.serviceWorkerPath = options.path;
+    if (options.scope) this.serviceWorkerScope = options.scope;
+  }
+
   async register(): Promise<boolean> {
     if (!this.isSupported) {
       console.warn('⚠️ Service Worker not supported in this browser');
@@ -45,13 +55,14 @@ class InscriptionServiceWorkerManager {
     }
 
     try {
-      console.log('📦 Registering Inscription Service Worker...');
+      console.log(`📦 Registering Inscription Service Worker from: ${this.serviceWorkerPath}`);
       
-      this.registration = await navigator.serviceWorker.register('/inscription-sw.js', {
-        scope: '/'
+      // Register with configurable path and scope
+      this.registration = await navigator.serviceWorker.register(this.serviceWorkerPath, {
+        scope: this.serviceWorkerScope
       });
 
-      console.log('✅ Service Worker registered successfully');
+      console.log('✅ Inscription Service Worker registered successfully');
 
       // Handle updates
       this.registration.addEventListener('updatefound', () => {
@@ -67,8 +78,13 @@ class InscriptionServiceWorkerManager {
       });
 
       return true;
-    } catch (error) {
-      console.error('❌ Service Worker registration failed:', error);
+    } catch (error: any) {
+      if (error.message?.includes('404') || error.name === 'TypeError') {
+        console.warn(`⚠️ Service Worker file ${this.serviceWorkerPath} not found - Service Worker functionality disabled`);
+        console.warn('   To enable Service Worker caching, ensure inscription-sw.js is available at the configured path');
+      } else {
+        console.error('❌ Service Worker registration failed:', error);
+      }
       return false;
     }
   }
@@ -176,15 +192,34 @@ import { useState, useEffect, useCallback } from 'react';
 export const useServiceWorker = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [cacheStats, setCacheStats] = useState<ServiceWorkerStats | null>(null);
   const [recentStats, setRecentStats] = useState({ hits: 0, misses: 0, hitRate: 0 });
 
   useEffect(() => {
-    // Auto-register on mount
-    swManager.register().then(success => {
-      setIsRegistered(success);
-      setIsActive(swManager.isActive());
-    });
+    // Auto-register on mount with proper error handling
+    if ('serviceWorker' in navigator) {
+      swManager.register().then(success => {
+        setIsRegistered(success);
+        setIsActive(swManager.isActive());
+        
+        if (!success) {
+          setRegistrationError('Service Worker registration failed - check if /inscription-sw.js exists');
+          console.warn('⚠️ Service Worker registration failed - check if /inscription-sw.js exists at the root of your domain');
+          console.warn('   Inscription caching will be disabled but the library will continue to work normally');
+        } else {
+          setRegistrationError(null);
+        }
+      }).catch(error => {
+        console.error('Service Worker registration error:', error);
+        setRegistrationError(`Registration error: ${error.message}`);
+        setIsRegistered(false);
+        setIsActive(false);
+      });
+    } else {
+      setRegistrationError('Service Worker not supported in this browser');
+      console.warn('⚠️ Service Worker not supported in this browser - caching disabled');
+    }
 
     // Update stats periodically
     const interval = setInterval(() => {
@@ -196,6 +231,8 @@ export const useServiceWorker = () => {
           if (result.success && result.stats) {
             setCacheStats(result.stats);
           }
+        }).catch(error => {
+          console.warn('Failed to get cache stats:', error);
         });
       }
     }, 5000);
@@ -229,6 +266,7 @@ export const useServiceWorker = () => {
   return {
     isRegistered,
     isActive,
+    registrationError,
     cacheStats,
     recentStats,
     clearCache,

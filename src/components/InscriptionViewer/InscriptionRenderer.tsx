@@ -59,7 +59,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
   size = 400,
   className = '',
   showHeader = false,
-  showControls = false,
+  showControls = true,
   autoLoad = true,
   apiEndpoint,
   htmlRenderMode = 'sandbox',
@@ -193,7 +193,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
           const objectUrl = URL.createObjectURL(blob);
           
           // Analyze content using the blob directly, not the original URL
-          const analysis = await analyzeContent(objectUrl);
+          const analysis = await analyzeContent(objectUrl, inscriptionId, cachedContent.contentType);
           
           if (!isMountedRef.current) return;
           
@@ -273,7 +273,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
             
             // Create object URL and analyze content
             const objectUrl = URL.createObjectURL(blob);
-            const analysis = await analyzeContent(objectUrl);
+            const analysis = await analyzeContent(objectUrl, inscriptionId, fetchedContentType);
             
             if (!isMountedRef.current) return;
             
@@ -330,7 +330,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
             
             // Create object URL and analyze content
             const objectUrl = URL.createObjectURL(blob);
-            const analysis = await analyzeContent(objectUrl);
+            const analysis = await analyzeContent(objectUrl, inscriptionId, laserEyesContent.contentType);
             
             if (!isMountedRef.current) return;
             
@@ -427,7 +427,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
       setLoadingStage('Analyzing content...');
       console.log('🔍 Analyzing content for:', inscriptionId);
       const objectUrl = URL.createObjectURL(blob);
-      const analysis = await analyzeContent(objectUrl);
+      const analysis = await analyzeContent(objectUrl, inscriptionId, detectedContentType);
       
       if (!isMountedRef.current) return;
 
@@ -575,7 +575,7 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
     };
   }, [loadedContent]);
 
-  const renderContent = () => {
+  const renderContent = React.useMemo(() => {
     if (!loadedContent) {
       console.log('🚫 No loaded content available');
       return null;
@@ -751,22 +751,24 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
           />
         );
     }
-  };
+  }, [loadedContent, size, showHeader, showControls, htmlRenderMode, forceIframe, inscriptionNumber, inscriptionId]);
 
   const headerHeight = showHeader ? 40 : 0;
   
   return (
     <div 
-      className={`overflow-hidden ${className}`}
+      className={`relative overflow-hidden ${className}`}
       style={{ 
         width: '100%',
         height: '100%',
-        minWidth: 'auto',
-        minHeight: showHeader ? size : 'auto', // Only set minHeight if header is shown
+        minWidth: 0, // Allow shrinking
+        minHeight: 0, // Allow shrinking
         maxWidth: '100%',
         maxHeight: '100%',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        margin: 0, // Ensure no margins
+        padding: 0 // Ensure no padding
       }}
     >
       {/* Header with inscription info */}
@@ -859,14 +861,22 @@ export const InscriptionRenderer = React.memo(function InscriptionRenderer({
 
         {/* Rendered content */}
         {loadedContent && !isLoading && !error && (
-          <div className="w-full h-full flex items-center justify-center">
+          <div 
+            className="flex-1 w-full h-full" 
+            style={{ 
+              margin: 0, 
+              padding: 0, 
+              overflow: 'hidden',
+              position: 'relative' 
+            }}
+          >
             {(() => {
               console.log('🔍 Rendering content section:', { 
                 hasLoadedContent: !!loadedContent, 
                 isLoading, 
                 hasError: !!error 
               });
-              return renderContent();
+              return renderContent;
             })()}
           </div>
         )}

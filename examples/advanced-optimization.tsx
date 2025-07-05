@@ -13,6 +13,7 @@ import {
   useBatchFetcher,
   createBatchFetchRequests,
   normalizeInscriptions,
+  throttledFetch,
   Card,
   CardContent,
   CardHeader,
@@ -59,6 +60,7 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
   const {
     isRegistered: swRegistered,
     isActive: swActive,
+    registrationError: swError,
     cacheStats: swCacheStats,
     recentStats: swRecentStats,
     clearCache: clearSwCache,
@@ -81,10 +83,10 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
 
   // Batch fetching
   const { fetchBatch, getActiveRequests, getQueueSize } = useBatchFetcher({
-    batchSize: 15,
-    maxConcurrency: 8,
-    retryAttempts: 3,
-    retryDelay: 1000,
+    batchSize: 3,
+    maxConcurrency: 1,
+    retryAttempts: 1,
+    retryDelay: 3000,
     timeout: 15000,
     priorityQueue: true
   });
@@ -147,7 +149,7 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
 
       // Fallback to API
       console.log(`🌐 Fetching ${inscriptionId} via API`);
-      const response = await fetch(`https://ordinals.com/content/${inscriptionId}`);
+      const response = await throttledFetch(`https://ordinals.com/content/${inscriptionId}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       
       const content = await response.blob();
@@ -339,8 +341,8 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
               <Badge variant={selectedOptimizations.memoryCache ? "default" : "secondary"}>
                 Memory Cache
               </Badge>
-              <Badge variant={selectedOptimizations.serviceWorker ? "default" : "secondary"}>
-                Service Worker
+              <Badge variant={selectedOptimizations.serviceWorker && swActive ? "default" : "secondary"}>
+                Service Worker {swRegistered ? (swActive ? "✓" : "⏳") : "✗"}
               </Badge>
               <Badge variant={selectedOptimizations.batchFetch ? "default" : "secondary"}>
                 Batch Fetch
@@ -352,7 +354,18 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Service Worker Error Display */}
+          {swError && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+              <div className="font-medium text-yellow-800">Service Worker Notice:</div>
+              <div className="text-yellow-700">{swError}</div>
+              <div className="text-yellow-600 mt-1">
+                Content will still load normally via API fallback.
+              </div>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Button
               variant={selectedOptimizations.memoryCache ? "default" : "outline"}
               onClick={() => setSelectedOptimizations(prev => ({
@@ -369,6 +382,7 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
                 serviceWorker: !prev.serviceWorker
               }))}
               disabled={!swRegistered}
+              title={!swRegistered ? "Service Worker not available" : "Toggle Service Worker caching"}
             >
               Service Worker
             </Button>
@@ -386,6 +400,14 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
               disabled={!selectedOptimizations.batchFetch}
             >
               Prefetch All
+            </Button>
+            <Button
+              onClick={performSwPrefetch}
+              disabled={!selectedOptimizations.serviceWorker || !swActive}
+              variant="outline"
+              title="Prefetch content via Service Worker for offline access"
+            >
+              SW Prefetch
             </Button>
           </div>
         </CardContent>
@@ -543,6 +565,8 @@ export const AdvancedOptimizationExample: React.FC<AdvancedOptimizationExamplePr
             <div>Prefetched Items: {Object.keys(prefetchedContent).length}</div>
             <div>Virtual Scroll: {virtualScrollConfig.enabled ? 'Enabled' : 'Disabled'}</div>
             <div>Visible Items: {virtualScrollConfig.enabled ? visibleItems.length : 'All'}</div>
+            <div>SW Status: {swRegistered ? (swActive ? 'Active' : 'Registered') : 'Not Available'}</div>
+            {swError && <div className="text-yellow-600">SW Error: {swError}</div>}
             <Button
               variant="outline"
               size="sm"

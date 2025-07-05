@@ -5,6 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.5] - 2025-07-05
+
+### 🎨 **Major UX Modernization & Library Enhancement**
+
+#### **Modern UX Improvements**
+- **MODERNIZED**: Hidden scrollbars by default across all text/code renderers for cleaner appearance
+- **ENHANCED**: Audio and Video renderers now use native HTML5 controls with custom overlays
+- **IMPROVED**: Always-visible play/pause controls for media content with minimal UI
+- **REMOVED**: Info/details bars from media players for cleaner, more modern look
+- **UPDATED**: Code detection logic ensures CodeRenderer is used for code content, not TextRenderer
+- **ADDED**: Cross-browser scrollbar hiding CSS with `.scrollbar-hide` utility class
+
+#### **Real Data Integration**
+- **REPLACED**: Fake inscription ID generation with real inscription fetching from ordinals.com
+- **ADDED**: CORS proxy fallback for reliable inscription data access
+- **IMPLEMENTED**: Manual refresh button for inscription data in demo
+- **ENHANCED**: UI feedback for inscription fetching status and error states
+- **FIXED**: Duplicate prop warnings in demo app components
+
+#### **Comprehensive Library Export Enhancement**
+- **COMPLETE**: 87 total exports now available for external consumption
+- **ADDED**: Individual renderers exported (TextRenderer, ImageRenderer, VideoRenderer, etc.)
+- **ADDED**: Content analysis utilities (`analyzeContent`, `shouldLazyLoad`) to main exports
+- **ADDED**: Missing InscriptionExplorer component to exports
+- **ENHANCED**: Complete service and API type exports for better TypeScript support
+- **DOCUMENTED**: Comprehensive library usage guide (`LIBRARY-USAGE.md`)
+- **CREATED**: Export verification script (`test-library-exports.js`)
+- **VERIFIED**: All 87 exports tested and documented
+
+#### **Export Categories**
+- **Components**: 10 main components (InscriptionViewer, Gallery, Modal, etc.)
+- **Renderers**: 10 individual content renderers for advanced usage
+- **UI Components**: 17 reusable UI components (Button, Card, Dialog, etc.)
+- **Services**: 8 service exports (API clients, caching, LaserEyes integration)
+- **Hooks**: 6 React hooks (data fetching, caching, performance monitoring)
+- **Utilities**: 6 utility functions (batch processing, content analysis)
+- **Types**: 30 TypeScript type definitions for full type safety
+
+#### **Developer Experience**
+- **ENHANCED**: Complete TypeScript support with all exports properly typed
+- **ADDED**: Deep import support for granular component access
+- **IMPROVED**: Build configuration verified for proper library distribution
+- **DOCUMENTED**: Example usage patterns for all major features
+- **CREATED**: Comprehensive library export review documentation
+
+### 🔧 **Technical Improvements**
+- **OPTIMIZED**: Cross-browser scrollbar hiding implementation
+- **ENHANCED**: Media renderer overlay system for better control accessibility
+- **IMPROVED**: Content type detection for better renderer selection
+- **REFINED**: Demo app real data integration with fallback strategies
+
+### 📚 **Documentation**
+- **ADDED**: `LIBRARY-USAGE.md` - Complete usage guide with examples
+- **ADDED**: `LIBRARY-EXPORT-REVIEW.md` - Comprehensive export verification
+- **UPDATED**: All export documentation with proper TypeScript types
+- **ENHANCED**: Usage examples for all major library features
+
+### ✅ **Verification**
+- All library exports tested and working
+- TypeScript compilation successful with no errors
+- Build system configured for proper NPM distribution
+- Real inscription data integration verified
+- Modern UX improvements implemented across all renderers
+
 ## [2.3.4] - 2025-07-04
 
 ### 🐛 Critical Fixes
@@ -14,17 +78,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FIXED**: Audio renderer enhanced with better error handling and blob URL support
 - **FIXED**: 3D renderer animation loop optimization and memory leak prevention
 
-### 🔧 Enhanced
+### � Service Worker Enhancements
+- **ENHANCED**: Service worker registration path now configurable (defaults to `/inscription-sw.js`)
+- **IMPROVED**: Better error handling for service worker 404s and missing files
+- **ADDED**: Graceful degradation when service worker is unavailable
+- **UPDATED**: `useServiceWorker` hook now exposes registration errors and detailed status
+- **DOCUMENTED**: Comprehensive service worker setup and usage guide added to README
+- **ADDED**: New service worker usage example (`examples/service-worker-usage.tsx`)
+
+### �🔧 Enhanced
 - **IMPROVED**: Network fallback logic ensures content is always analyzed from correct blob URL
 - **IMPROVED**: Audio loading with comprehensive error messages and format detection
 - **IMPROVED**: Better debugging output for content analysis and loading stages
 - **IMPROVED**: Robust error handling for all supported audio formats (MP3, WAV, OGG, M4A, AAC, FLAC, WebM)
+- **DOCUMENTED**: Service worker features and troubleshooting guide in documentation.html
 
 ### ✅ Verified
 - All TypeScript compilation errors resolved
 - Content pipeline working correctly with blob URLs
 - Audio and 3D renderers fully functional
 - Memory management optimized for large files
+- Service worker registration and error handling working correctly
 
 ## [2.3.3] - 2025-07-04
 
